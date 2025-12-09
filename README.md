@@ -51,6 +51,33 @@ npm run build
 
 Open [http://localhost:3000](http://localhost:3000) to view the application.
 
+## Deployment
+
+### Deploy to Railway
+
+The easiest way to deploy Lexchange is using Railway:
+
+1. **Quick Deploy**
+   - Go to [Railway](https://railway.app)
+   - Login with GitHub
+   - Click "New Project" → "Deploy from GitHub repo"
+   - Select `lexyerresta/lexchange`
+   - Railway auto-detects Next.js and deploys
+
+2. **Detailed Guide**
+   - See [DEPLOY_STEPS.md](DEPLOY_STEPS.md) for step-by-step instructions
+   - See [RAILWAY_DEPLOY.md](RAILWAY_DEPLOY.md) for complete documentation
+
+3. **Auto-Deploy**
+   - Every push to `main` branch automatically deploys
+   - Zero-downtime deployments
+   - View logs and metrics in Railway dashboard
+
+### Alternative Platforms
+- **Vercel**: Import from GitHub at [vercel.com](https://vercel.com)
+- **Netlify**: Connect repo at [netlify.com](https://netlify.com)
+- **Heroku**: Use included Procfile
+
 ## Usage
 
 ### Default User Credentials
