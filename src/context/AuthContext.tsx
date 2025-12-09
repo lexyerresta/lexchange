@@ -3,19 +3,37 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-interface Asset {
+export interface Asset {
     symbol: string;
     name: string;
     amount: number;
-    value: number; // For simplicity in this mock, we'll store static value or recalc later
+    value: number;
 }
 
-interface User {
+export interface Transaction {
+    id: string;
+    type: 'buy' | 'sell';
+    fromToken: string;
+    toToken: string;
+    fromAmount: number;
+    toAmount: number;
+    price: number;
+    timestamp: number;
+    status: 'pending' | 'completed' | 'failed';
+    txHash?: string;
+}
+
+export interface User {
     address: string;
     username: string;
     balance: number;
-    watchlist: string[]; // List of coin IDs/symbols
+    watchlist: string[];
     assets: Asset[];
+    transactions: Transaction[];
+    settings: {
+        slippage: number;
+        autoApprove: boolean;
+    };
 }
 
 interface AuthContextType {
@@ -24,13 +42,13 @@ interface AuthContextType {
     register: (username: string) => Promise<void>;
     logout: () => void;
     toggleWatchlist: (coinSymbol: string) => void;
-    executeTrade: (isBuy: boolean, inputSymbol: string, outputSymbol: string, amountIn: number, amountOut: number) => Promise<void>;
+    executeTrade: (isBuy: boolean, inputSymbol: string, outputSymbol: string, amountIn: number, amountOut: number) => Promise<string>;
+    updateSettings: (settings: Partial<User['settings']>) => void;
     isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Dummy Data for specific user
 const DUMMY_USER_ASSETS: Asset[] = [
     { symbol: 'BTC', name: 'Bitcoin', amount: 0.042, value: 2840.50 },
     { symbol: 'USDT', name: 'Tether', amount: 80.19, value: 80.19 },
@@ -42,7 +60,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        // Check local storage for persistent login
         const storedUser = localStorage.getItem('lexchange_user');
         if (storedUser) {
             setUser(JSON.parse(storedUser));
@@ -50,7 +67,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsLoading(false);
     }, []);
 
-    // Sync user changes to local storage
     useEffect(() => {
         if (user) {
             localStorage.setItem('lexchange_user', JSON.stringify(user));
@@ -61,20 +77,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const login = async () => {
         setIsLoading(true);
-        await new Promise(resolve => setTimeout(resolve, 800)); // Sim delay
+        await new Promise(resolve => setTimeout(resolve, 800));
 
-        // Restore or create default dummy user
         const stored = localStorage.getItem('lexchange_user');
         if (stored) {
             setUser(JSON.parse(stored));
         } else {
-            // Default dummy user if none exists
             setUser({
-                address: '0x71C...9A21',
+                address: '0x71C7B...9A21',
                 username: 'LexyTrader',
                 balance: 4120.69,
                 watchlist: ['bitcoin', 'ethereum', 'solana'],
-                assets: DUMMY_USER_ASSETS
+                assets: DUMMY_USER_ASSETS,
+                transactions: [],
+                settings: {
+                    slippage: 0.5,
+                    autoApprove: false
+                }
             });
         }
         setIsLoading(false);
@@ -84,15 +103,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsLoading(true);
         await new Promise(resolve => setTimeout(resolve, 800));
 
-        // Create new user with starter pack
         const newUser: User = {
-            address: '0xNew...User',
+            address: `0x${Math.random().toString(36).substr(2, 8)}...${Math.random().toString(36).substr(2, 4)}`,
             username: username || 'New Trader',
-            balance: 1000.00, // Sign up bonus!
+            balance: 1000.00,
             watchlist: [],
             assets: [
                 { symbol: 'USDT', name: 'Tether', amount: 1000, value: 1000 }
-            ]
+            ],
+            transactions: [],
+            settings: {
+                slippage: 0.5,
+                autoApprove: false
+            }
         };
         setUser(newUser);
         setIsLoading(false);
@@ -118,64 +141,96 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser({ ...user, watchlist: newList });
     };
 
-    const executeTrade = async (isBuy: boolean, inputSymbol: string, outputSymbol: string, amountIn: number, amountOut: number) => {
+    const updateSettings = (newSettings: Partial<User['settings']>) => {
+        if (!user) return;
+        setUser({
+            ...user,
+            settings: { ...user.settings, ...newSettings }
+        });
+    };
+
+    const executeTrade = async (isBuy: boolean, inputSymbol: string, outputSymbol: string, amountIn: number, amountOut: number): Promise<string> => {
         if (!user) throw new Error("User not logged in");
 
         setIsLoading(true);
-        await new Promise(resolve => setTimeout(resolve, 1000)); // Simulating transaction processing
 
-        // Deep copy user to mutate
+        // Generate transaction ID and hash
+        const txId = `tx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const txHash = `0x${Math.random().toString(36).substr(2, 64)}`;
+
+        // Create pending transaction
+        const newTransaction: Transaction = {
+            id: txId,
+            type: isBuy ? 'buy' : 'sell',
+            fromToken: isBuy ? 'USDT' : inputSymbol,
+            toToken: isBuy ? outputSymbol : 'USDT',
+            fromAmount: amountIn,
+            toAmount: amountOut,
+            price: isBuy ? amountIn / amountOut : amountOut / amountIn,
+            timestamp: Date.now(),
+            status: 'pending',
+            txHash
+        };
+
+        // Add pending transaction
         const updatedUser = JSON.parse(JSON.stringify(user));
+        updatedUser.transactions = [newTransaction, ...(updatedUser.transactions || [])];
+        setUser(updatedUser);
 
+        // Simulate transaction processing
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        // Process the trade
         if (isBuy) {
-            // Buying: Paying with USDT (Quote), Receiving Token (Base)
-            // Check balance
             if (updatedUser.balance < amountIn) {
+                newTransaction.status = 'failed';
+                setUser(updatedUser);
                 setIsLoading(false);
                 throw new Error("Insufficient USDT balance");
             }
 
-            // Deduct USDT (Balance)
             updatedUser.balance -= amountIn;
 
-            // Add Token to Assets
-            const existingAsset = updatedUser.assets.find((micin: Asset) => micin.symbol === outputSymbol);
+            const existingAsset = updatedUser.assets.find((a: Asset) => a.symbol === outputSymbol);
             if (existingAsset) {
                 existingAsset.amount += amountOut;
-                existingAsset.value += amountIn; // Approx value update
+                existingAsset.value += amountIn;
             } else {
                 updatedUser.assets.push({
                     symbol: outputSymbol,
-                    name: outputSymbol, // Simplification
+                    name: outputSymbol,
                     amount: amountOut,
                     value: amountIn
                 });
             }
         } else {
-            // Selling: Paying with Token (Base), Receiving USDT (Quote)
-            const existingAsset = updatedUser.assets.find((micin: Asset) => micin.symbol === inputSymbol);
+            const existingAsset = updatedUser.assets.find((a: Asset) => a.symbol === inputSymbol);
             if (!existingAsset || existingAsset.amount < amountIn) {
+                newTransaction.status = 'failed';
+                setUser(updatedUser);
                 setIsLoading(false);
                 throw new Error(`Insufficient ${inputSymbol} balance`);
             }
 
-            // Deduct Token
             existingAsset.amount -= amountIn;
-            existingAsset.value -= amountOut; // Approx value reduction
+            existingAsset.value -= amountOut;
             if (existingAsset.amount <= 0.000001) {
                 updatedUser.assets = updatedUser.assets.filter((a: Asset) => a.symbol !== inputSymbol);
             }
 
-            // Add USDT (Balance)
             updatedUser.balance += amountOut;
         }
 
+        // Mark transaction as completed
+        newTransaction.status = 'completed';
         setUser(updatedUser);
         setIsLoading(false);
+
+        return txHash;
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, register, logout, toggleWatchlist, executeTrade, isLoading }}>
+        <AuthContext.Provider value={{ user, login, register, logout, toggleWatchlist, executeTrade, updateSettings, isLoading }}>
             {children}
         </AuthContext.Provider>
     );
@@ -188,4 +243,3 @@ export function useAuth() {
     }
     return context;
 }
-

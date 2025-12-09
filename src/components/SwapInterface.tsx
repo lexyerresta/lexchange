@@ -1,193 +1,263 @@
-
 'use client';
 
 import { useState } from 'react';
-import { ArrowDownUp, Info, Settings, Wallet, Loader2 } from 'lucide-react';
+import { ArrowDownUp, Settings, Wallet, Loader2 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
+import TransactionModal from './TransactionModal';
 
 export default function SwapInterface({ symbol, price }: { symbol: string, price: number }) {
     const { user, executeTrade } = useAuth();
     const { showToast } = useToast();
 
-
-    const [amountIn, setAmountIn] = useState('1');
+    const [amountIn, setAmountIn] = useState('');
     const [isBuy, setIsBuy] = useState(true);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [success, setSuccess] = useState<string | null>(null);
+    const [showModal, setShowModal] = useState(false);
+    const [showSettings, setShowSettings] = useState(false);
 
     const tokenSymbol = symbol.toUpperCase().replace('-USD', '');
     const quoteSymbol = 'USDT';
 
-    const estimatedOut = isBuy
-        ? (parseFloat(amountIn || '0') / price).toFixed(6)
-        : (parseFloat(amountIn || '0') * price).toFixed(2);
+    const estimatedOut = amountIn && parseFloat(amountIn) > 0
+        ? isBuy
+            ? (parseFloat(amountIn) / price).toFixed(8)
+            : (parseFloat(amountIn) * price).toFixed(2)
+        : '0.00';
 
     const balance = isBuy
         ? user?.balance || 0
         : user?.assets.find(a => a.symbol === tokenSymbol)?.amount || 0;
 
-    const handleSwap = async () => {
+    const slippage = user?.settings?.slippage || 0.5;
+
+    const handleMaxClick = () => {
+        if (balance > 0) {
+            // Reserve small amount for gas if buying
+            const maxAmount = isBuy ? Math.max(0, balance - 1) : balance;
+            setAmountIn(maxAmount.toString());
+        }
+    };
+
+    const handleSwapClick = () => {
         if (!user) {
-            setError("Please connect wallet first");
+            showToast("Please connect wallet first", "error");
             return;
         }
-        setSuccess(null);
-        setError(null);
-        setLoading(true);
 
+        const inputVal = parseFloat(amountIn || '0');
+        if (inputVal <= 0) {
+            showToast("Enter valid amount", "error");
+            return;
+        }
+
+        if (inputVal > balance) {
+            showToast(`Insufficient ${isBuy ? 'USDT' : tokenSymbol} balance`, "error");
+            return;
+        }
+
+        setShowModal(true);
+    };
+
+    const handleConfirmTrade = async () => {
         try {
-            const inputVal = parseFloat(amountIn || '0');
-            const outputVal = parseFloat(estimatedOut || '0');
+            const inputVal = parseFloat(amountIn);
+            const outputVal = parseFloat(estimatedOut);
 
-            if (inputVal <= 0) throw new Error("Enter valid amount");
-
-            await executeTrade(
+            const txHash = await executeTrade(
                 isBuy,
-                isBuy ? quoteSymbol : tokenSymbol, // Input Token
-                isBuy ? tokenSymbol : quoteSymbol, // Output Token
+                isBuy ? quoteSymbol : tokenSymbol,
+                isBuy ? tokenSymbol : quoteSymbol,
                 inputVal,
                 outputVal
             );
 
-            setSuccess(`Swapped ${inputVal} ${isBuy ? quoteSymbol : tokenSymbol} for ${outputVal} ${isBuy ? tokenSymbol : quoteSymbol}`);
+            showToast(
+                `Transaction confirmed! ${outputVal.toFixed(6)} ${isBuy ? tokenSymbol : quoteSymbol} received`,
+                "success"
+            );
             setAmountIn('');
+            setShowModal(false);
         } catch (e: any) {
-            setError(e.message || "Swap failed");
-        } finally {
-            setLoading(false);
+            showToast(e.message || "Transaction failed", "error");
+            throw e;
         }
     };
 
     return (
-        <div style={{
-            background: '#1e222d',
-            borderRadius: '1rem',
-            padding: '1.5rem',
-            border: '1px solid rgba(255,255,255,0.05)',
-            color: 'white'
-        }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-                <div style={{ fontWeight: '600', fontSize: '1.1rem' }}>Swap</div>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <Settings size={18} color="#94a3b8" style={{ cursor: 'pointer' }} />
-                </div>
-            </div>
-
-            <div style={{ background: '#2a2e39', padding: '1rem', borderRadius: '0.8rem', marginBottom: '0.5rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                    <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>You pay</span>
-                    <span
-                        style={{ color: '#94a3b8', fontSize: '0.9rem', cursor: 'pointer', textDecoration: 'underline' }}
-                        onClick={() => setAmountIn(balance.toString())}
-                    >
-                        Balance: {balance.toLocaleString()}
-                    </span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <input
-                        type="number"
-                        value={amountIn}
-                        onChange={(e) => { setAmountIn(e.target.value); setError(null); setSuccess(null); }}
+        <>
+            <div style={{
+                background: '#1e222d',
+                borderRadius: '1rem',
+                padding: '1.5rem',
+                border: '1px solid rgba(255,255,255,0.05)',
+                color: 'white'
+            }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+                    <div style={{ fontWeight: '600', fontSize: '1.1rem' }}>Swap</div>
+                    <button
+                        onClick={() => setShowSettings(!showSettings)}
                         style={{
                             background: 'none',
                             border: 'none',
-                            color: 'white',
-                            fontSize: '1.5rem',
-                            fontWeight: '600',
-                            width: '60%',
-                            outline: 'none'
+                            color: '#94a3b8',
+                            cursor: 'pointer',
+                            padding: '0.25rem',
+                            display: 'flex'
                         }}
-                    />
+                    >
+                        <Settings size={18} />
+                    </button>
+                </div>
+
+                {showSettings && (
                     <div style={{
-                        background: '#1e222d',
-                        padding: '0.4rem 0.8rem',
-                        borderRadius: '1rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        fontWeight: '600'
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        borderRadius: '0.75rem',
+                        padding: '1rem',
+                        marginBottom: '1rem'
                     }}>
-                        {isBuy ? quoteSymbol : tokenSymbol}
+                        <div style={{ fontSize: '0.9rem', color: '#94a3b8', marginBottom: '0.5rem' }}>
+                            Slippage Tolerance: {slippage}%
+                        </div>
+                        <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                            Adjust in Settings
+                        </div>
+                    </div>
+                )}
+
+                <div style={{ background: '#2a2e39', padding: '1rem', borderRadius: '0.8rem', marginBottom: '0.5rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                        <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>You pay</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>
+                                Balance: {balance.toLocaleString(undefined, { maximumFractionDigits: 6 })}
+                            </span>
+                            <button
+                                onClick={handleMaxClick}
+                                style={{
+                                    background: 'rgba(167, 139, 250, 0.2)',
+                                    border: '1px solid rgba(167, 139, 250, 0.3)',
+                                    color: '#a78bfa',
+                                    padding: '0.2rem 0.5rem',
+                                    borderRadius: '0.3rem',
+                                    fontSize: '0.75rem',
+                                    fontWeight: '600',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                MAX
+                            </button>
+                        </div>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <input
+                            type="number"
+                            value={amountIn}
+                            onChange={(e) => setAmountIn(e.target.value)}
+                            placeholder="0.0"
+                            style={{
+                                background: 'none',
+                                border: 'none',
+                                color: 'white',
+                                fontSize: '1.5rem',
+                                fontWeight: '600',
+                                width: '60%',
+                                outline: 'none'
+                            }}
+                        />
+                        <div style={{
+                            background: '#1e222d',
+                            padding: '0.4rem 0.8rem',
+                            borderRadius: '1rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            fontWeight: '600'
+                        }}>
+                            {isBuy ? quoteSymbol : tokenSymbol}
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Switch Button */}
-            <div style={{ display: 'flex', justifyContent: 'center', margin: '-1rem 0', position: 'relative', zIndex: 10 }}>
+                <div style={{ display: 'flex', justifyContent: 'center', margin: '-1rem 0', position: 'relative', zIndex: 10 }}>
+                    <button
+                        onClick={() => setIsBuy(!isBuy)}
+                        style={{
+                            background: '#363a45',
+                            border: '4px solid #1e222d',
+                            borderRadius: '0.5rem',
+                            padding: '0.4rem',
+                            color: 'white',
+                            cursor: 'pointer',
+                            transition: 'transform 0.2s'
+                        }}
+                    >
+                        <ArrowDownUp size={16} />
+                    </button>
+                </div>
+
+                <div style={{ background: '#2a2e39', padding: '1rem', borderRadius: '0.8rem', marginTop: '0.5rem', marginBottom: '1.5rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                        <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>You receive</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '1.5rem', fontWeight: '600', color: estimatedOut === '0.00' ? '#94a3b8' : 'white' }}>
+                            {estimatedOut}
+                        </span>
+                        <div style={{
+                            background: '#1e222d',
+                            padding: '0.4rem 0.8rem',
+                            borderRadius: '1rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            fontWeight: '600'
+                        }}>
+                            {isBuy ? tokenSymbol : quoteSymbol}
+                        </div>
+                    </div>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+                    <span>1 {tokenSymbol} = ${price.toLocaleString()}</span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                        <Wallet size={14} /> Gas: ~$0.42
+                    </span>
+                </div>
+
                 <button
-                    onClick={() => setIsBuy(!isBuy)}
+                    onClick={handleSwapClick}
+                    disabled={!user || !amountIn || parseFloat(amountIn) <= 0}
                     style={{
-                        background: '#363a45',
-                        border: '4px solid #1e222d',
-                        borderRadius: '0.5rem',
-                        padding: '0.4rem',
-                        color: 'white',
-                        cursor: 'pointer',
-                        transition: 'transform 0.2s'
+                        width: '100%',
+                        background: isBuy ? '#4ade80' : '#f87171',
+                        color: 'black',
+                        padding: '1rem',
+                        borderRadius: '0.8rem',
+                        fontWeight: '700',
+                        fontSize: '1.1rem',
+                        border: 'none',
+                        cursor: (!user || !amountIn || parseFloat(amountIn) <= 0) ? 'not-allowed' : 'pointer',
+                        opacity: (!user || !amountIn || parseFloat(amountIn) <= 0) ? 0.5 : 1,
+                        transition: 'all 0.2s'
                     }}
                 >
-                    <ArrowDownUp size={16} />
+                    {!user ? 'Connect Wallet' : `${isBuy ? 'Buy' : 'Sell'} ${tokenSymbol}`}
                 </button>
             </div>
 
-            {/* Output Field */}
-            <div style={{ background: '#2a2e39', padding: '1rem', borderRadius: '0.8rem', marginTop: '0.5rem', marginBottom: '1.5rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                    <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>You receive</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '1.5rem', fontWeight: '600', color: estimatedOut === 'NaN' ? '#94a3b8' : 'white' }}>
-                        {estimatedOut === 'NaN' ? '0.00' : estimatedOut}
-                    </span>
-                    <div style={{
-                        background: '#1e222d',
-                        padding: '0.4rem 0.8rem',
-                        borderRadius: '1rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        fontWeight: '600'
-                    }}>
-                        {isBuy ? tokenSymbol : quoteSymbol}
-                    </div>
-                </div>
-            </div>
-
-            {/* Price Info */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
-                <span>1 {tokenSymbol} = {price} {quoteSymbol}</span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Wallet size={14} /> Gas: $0.42</span>
-            </div>
-
-            {error && <div style={{ color: '#f87171', marginBottom: '1rem', fontSize: '0.9rem' }}>{error}</div>}
-            {success && <div style={{ color: '#4ade80', marginBottom: '1rem', fontSize: '0.9rem' }}>{success}</div>}
-
-            <button
-                onClick={handleSwap}
-                disabled={loading}
-                style={{
-                    width: '100%',
-                    background: isBuy ? '#4ade80' : '#f87171',
-                    color: 'black',
-                    padding: '1rem',
-                    borderRadius: '0.8rem',
-                    fontWeight: '700',
-                    fontSize: '1.1rem',
-                    border: 'none',
-                    cursor: loading ? 'wait' : 'pointer',
-                    transition: 'filter 0.2s',
-                    opacity: loading ? 0.7 : 1,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.5rem'
-                }}
-            >
-                {loading && <Loader2 className="animate-spin" size={20} />}
-                {loading ? 'Swapping...' : (isBuy ? 'Buy ' + tokenSymbol : 'Sell ' + tokenSymbol)}
-            </button>
-        </div>
+            <TransactionModal
+                isOpen={showModal}
+                onClose={() => setShowModal(false)}
+                onConfirm={handleConfirmTrade}
+                type={isBuy ? 'buy' : 'sell'}
+                fromToken={isBuy ? quoteSymbol : tokenSymbol}
+                toToken={isBuy ? tokenSymbol : quoteSymbol}
+                fromAmount={parseFloat(amountIn || '0')}
+                toAmount={parseFloat(estimatedOut || '0')}
+                price={price}
+                slippage={slippage}
+            />
+        </>
     );
 }
