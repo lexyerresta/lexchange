@@ -1,0 +1,196 @@
+.navbar {
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+    top: 0;
+    transition: all 0.3s ease;
+}
+
+.container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 1rem 1.5rem;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    font-family: 'Outfit', sans-serif;
+}
+
+.logoIcon {
+    width: 2rem;
+    height: 2rem;
+    background: linear-gradient(135deg, #22d3ee, #9333ea);
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-family: monospace;
+}
+
+.logoText {
+    background: linear-gradient(to right, #a78bfa, #22d3ee);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.desktopMenu {
+    display: none;
+    gap: 2rem;
+}
+
+.navLink {
+    color: #d1d5db;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+    font-size: 0.95rem;
+}
+
+.navLink:hover {
+    color: #fff;
+}
+
+.authButtons {
+    display: none;
+    gap: 1rem;
+    align-items: center;
+}
+
+.loginBtn {
+    background: none;
+    border: none;
+    color: #d1d5db;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.95rem;
+}
+
+.loginBtn:hover {
+    color: #fff;
+}
+
+.signupBtn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(90deg, #9333ea, #4f46e5);
+    color: white;
+    border: none;
+    padding: 0.6rem 1.4rem;
+    border-radius: 9999px;
+    /* full rounded */
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 15px rgba(147, 51, 234, 0.3);
+    font-family: inherit;
+    font-size: 0.95rem;
+}
+
+.signupBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(147, 51, 234, 0.4);
+}
+
+.mobileToggle {
+    background: none;
+    border: none;
+    color: #d1d5db;
+    cursor: pointer;
+}
+
+.mobileMenu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mobileMenuInner {
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+    gap: 1rem;
+}
+
+@media (min-width: 768px) {
+    .desktopMenu {
+        display: flex;
+    }
+
+    .authButtons {
+        display: flex;
+    }
+
+    .mobileToggle {
+        display: none;
+    }
+}
+
+.userBtn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.8rem;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+}
+
+.userBtn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(167, 139, 250, 0.5);
+}
+
+.userMenu {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    background: rgba(20, 20, 30, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.8rem;
+    min-width: 200px;
+    padding: 0.5rem;
+    z-index: 1000;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.menuItem {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.8rem 1rem;
+    color: white;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+.menuItem:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.menuDivider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 0.5rem 0;
+}

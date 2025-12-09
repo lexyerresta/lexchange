@@ -1,0 +1,224 @@
+.marketSection {
+    padding: 4rem 1.5rem;
+    max-width: 1280px;
+    margin: 0 auto;
+}
+
+.title {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    font-weight: 700;
+}
+
+
+.controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.searchContainer {
+    position: relative;
+    max-width: 400px;
+    width: 100%;
+}
+
+.searchInput {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.8rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.75rem;
+    color: white;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+}
+
+.searchInput:focus {
+    outline: none;
+    border-color: #a78bfa;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.searchIcon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    pointer-events: none;
+}
+
+.tableContainer {
+    overflow-x: auto;
+    border-radius: 1rem;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 900px;
+}
+
+.th {
+    text-align: left;
+    padding: 0.75rem 1rem;
+    color: #94a3b8;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.03);
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.2s;
+}
+
+.th:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.tr {
+    transition: background 0.1s;
+}
+
+.tr:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    vertical-align: middle;
+    font-size: 0.9rem;
+}
+
+.coinInfo {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.icon {
+    width: 1.8rem;
+    height: 1.8rem;
+    border-radius: 50%;
+    background: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: bold;
+}
+
+.symbol {
+    color: #94a3b8;
+    margin-left: 0.4rem;
+    font-size: 0.8rem;
+}
+
+.price {
+    font-weight: 600;
+    font-family: 'Roboto Mono', monospace;
+}
+
+.volume {
+    color: #94a3b8;
+    font-size: 0.85rem;
+}
+
+.change {
+    font-weight: 500;
+}
+
+.positive {
+    color: #4ade80;
+}
+
+.negative {
+    color: #f87171;
+}
+
+.filterBtn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #94a3b8;
+    padding: 0.4rem 0.8rem;
+    border-radius: 0.5rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.filterBtn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.activeFilter {
+    background: rgba(167, 139, 250, 0.2);
+    border-color: #a78bfa;
+    color: #a78bfa;
+}
+
+.iconImg {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+}
+
+.pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+    padding: 0 0.5rem;
+}
+
+.pageBtn {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 0.4rem 0.8rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+.pageBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pageBtn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.tradeBtn {
+    background: rgba(167, 139, 250, 0.1);
+    border: 1px solid rgba(167, 139, 250, 0.3);
+    color: #a78bfa;
+    padding: 0.3rem 0.8rem;
+    border-radius: 0.4rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.tradeBtn:hover {
+    background: #a78bfa;
+    color: #fff;
+}
