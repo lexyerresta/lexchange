@@ -4,9 +4,12 @@
 import { useState } from 'react';
 import { ArrowDownUp, Info, Settings, Wallet, Loader2 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/context/ToastContext';
 
 export default function SwapInterface({ symbol, price }: { symbol: string, price: number }) {
     const { user, executeTrade } = useAuth();
+    const { showToast } = useToast();
+
 
     const [amountIn, setAmountIn] = useState('1');
     const [isBuy, setIsBuy] = useState(true);
