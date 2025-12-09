@@ -4,14 +4,62 @@ import { ArrowLeft, ExternalLink, ShieldCheck } from 'lucide-react';
 import SwapInterface from '@/components/SwapInterface';
 import TradingChart from '@/components/TradingChart';
 
+
+// Symbol to ID mapping for common coins
+const symbolToId: Record<string, string> = {
+    'btc': 'bitcoin',
+    'eth': 'ethereum',
+    'usdt': 'tether',
+    'bnb': 'binancecoin',
+    'sol': 'solana',
+    'xrp': 'ripple',
+    'usdc': 'usd-coin',
+    'ada': 'cardano',
+    'doge': 'dogecoin',
+    'trx': 'tron',
+    'ton': 'the-open-network',
+    'link': 'chainlink',
+    'matic': 'matic-network',
+    'dot': 'polkadot',
+    'dai': 'dai',
+    'shib': 'shiba-inu',
+    'avax': 'avalanche-2',
+    'uni': 'uniswap',
+    'atom': 'cosmos',
+    'ltc': 'litecoin'
+};
+
 // Helper to fetch single coin data
-async function getCoinData(id: string) {
+async function getCoinData(symbolOrId: string) {
     try {
-        const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${id.toLowerCase()}&sparkline=false`, {
+        // Try to map symbol to ID
+        const coinId = symbolToId[symbolOrId.toLowerCase()] || symbolOrId.toLowerCase();
+
+        const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${coinId}&sparkline=false`, {
             next: { revalidate: 60 }
         });
         const data = await res.json();
-        return data[0];
+
+        if (data && data.length > 0) {
+            return data[0];
+        }
+
+        // If not found by ID, try searching by symbol
+        const searchRes = await fetch(`https://api.coingecko.com/api/v3/search?query=${symbolOrId}`, {
+            next: { revalidate: 3600 }
+        });
+        const searchData = await searchRes.json();
+
+        if (searchData.coins && searchData.coins.length > 0) {
+            const foundCoin = searchData.coins[0];
+            const detailRes = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${foundCoin.id}&sparkline=false`, {
+                next: { revalidate: 60 }
+            });
+            const detailData = await detailRes.json();
+            return detailData[0];
+        }
+
+        return null;
     } catch (e) {
         console.error(e);
         return null;
