@@ -6,6 +6,7 @@ import Hero from "@/components/Hero";
 import MarketTable from "@/components/MarketTable";
 import Footer from "@/components/Footer";
 import AnimatedBackground from "@/components/AnimatedBackground";
+import ThreeJSShowcase from "@/components/ThreeJSShowcase";
 import { Zap, Shield, TrendingUp, Users, Bot, Eye } from 'lucide-react';
 
 export default function Home() {
@@ -69,6 +70,34 @@ export default function Home() {
       <div style={{ position: 'relative', zIndex: 1 }}>
         <Navbar />
         <Hero />
+
+        {/* 3D Showcase Section */}
+        <section style={{
+          padding: '6rem 2rem',
+          maxWidth: '1400px',
+          margin: '0 auto',
+          transform: `translateY(${Math.max(0, (scrollY - 300) * -0.08)}px)`,
+          opacity: Math.min(1, Math.max(0, (scrollY - 100) / 300))
+        }}>
+          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+            <h2 style={{
+              fontSize: 'clamp(2rem, 5vw, 3rem)',
+              fontWeight: '800',
+              marginBottom: '1rem',
+              background: 'linear-gradient(135deg, #f7931a 0%, #fbbf24 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text'
+            }}>
+              Experience the Future
+            </h2>
+            <p style={{ color: '#94a3b8', fontSize: '1.2rem', maxWidth: '600px', margin: '0 auto' }}>
+              Interactive 3D visualization of cryptocurrency
+            </p>
+          </div>
+
+          <ThreeJSShowcase />
+        </section>
 
         {/* Features Section */}
         <section style={{
