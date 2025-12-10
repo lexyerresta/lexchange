@@ -116,15 +116,55 @@ export default function AITraderChat() {
         };
 
         setMessages(prev => [...prev, userMessage]);
+        const currentInput = input;
         setInput('');
         setIsTyping(true);
 
-        // Simulate AI thinking
-        setTimeout(() => {
-            const aiResponse = generateAIResponse(input);
+        try {
+            // Call real AI API
+            const response = await fetch('/api/ai-chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: currentInput,
+                    context: {
+                        user: user ? {
+                            username: user.username,
+                            balance: user.balance,
+                            assets: user.assets,
+                            transactions: user.transactions?.slice(0, 5) // Last 5 transactions
+                        } : null
+                    }
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('AI API request failed');
+            }
+
+            const data = await response.json();
+
+            const aiResponse: Message = {
+                id: Date.now().toString(),
+                role: 'assistant',
+                content: data.response,
+                timestamp: Date.now(),
+                suggestions: data.suggestions || []
+            };
+
             setMessages(prev => [...prev, aiResponse]);
+        } catch (error) {
+            console.error('AI Chat Error:', error);
+            showToast('Failed to get AI response. Please try again.', 'error');
+
+            // Fallback to mock response if API fails
+            const aiResponse = generateAIResponse(currentInput);
+            setMessages(prev => [...prev, aiResponse]);
+        } finally {
             setIsTyping(false);
-        }, 1500);
+        }
     };
 
     const handleSuggestion = (suggestion: string) => {
