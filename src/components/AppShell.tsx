@@ -2,9 +2,22 @@
 import { useState } from 'react';
 import Sidebar from './Sidebar';
 import { Menu } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
-    const [sidebarOpen, setSidebarOpen] = useState(false); // Hidden by default
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const { user } = useAuth();
+
+    // Only show sidebar for logged-in users
+    if (!user) {
+        return (
+            <div style={{ minHeight: '100vh', background: '#111', position: 'relative' }}>
+                <main style={{ width: '100%', position: 'relative' }}>
+                    {children}
+                </main>
+            </div>
+        );
+    }
 
     return (
         <div style={{ display: 'flex', minHeight: '100vh', background: '#111', position: 'relative' }}>
