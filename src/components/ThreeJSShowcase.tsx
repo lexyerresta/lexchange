@@ -18,74 +18,132 @@ export default function ThreeJSShowcase() {
         renderer.setPixelRatio(window.devicePixelRatio);
         container.appendChild(renderer.domElement);
 
-        // Create crypto coin (Bitcoin)
-        const coinGeometry = new THREE.CylinderGeometry(2, 2, 0.3, 64);
-        const coinMaterial = new THREE.MeshStandardMaterial({
-            color: 0xf7931a,
-            metalness: 0.8,
-            roughness: 0.2,
-            emissive: 0xf7931a,
-            emissiveIntensity: 0.2
-        });
-        const coin = new THREE.Mesh(coinGeometry, coinMaterial);
-        coin.rotation.x = Math.PI / 2;
-        scene.add(coin);
+        // Create multiple crypto coins
+        const coins: THREE.Group[] = [];
+        const coinData = [
+            { color: 0xf7931a, emissive: 0xf7931a, position: [0, 0, 0], scale: 1.5 }, // BTC (center, larger)
+            { color: 0x627eea, emissive: 0x627eea, position: [-4, 2, -2], scale: 1 }, // ETH
+            { color: 0x00d4aa, emissive: 0x00d4aa, position: [4, -2, -2], scale: 1 }, // USDT
+            { color: 0x14f195, emissive: 0x14f195, position: [-3, -3, -3], scale: 0.8 }, // SOL
+            { color: 0xf3ba2f, emissive: 0xf3ba2f, position: [3, 3, -3], scale: 0.8 }  // BNB
+        ];
 
-        // Add Bitcoin logo (simplified)
-        const logoGeometry = new THREE.TorusGeometry(1.2, 0.15, 16, 100);
-        const logoMaterial = new THREE.MeshStandardMaterial({
-            color: 0xffffff,
-            metalness: 1,
-            roughness: 0.1,
-            emissive: 0xffffff,
-            emissiveIntensity: 0.3
-        });
-        const logo = new THREE.Mesh(logoGeometry, logoMaterial);
-        logo.position.z = 0.2;
-        coin.add(logo);
+        coinData.forEach((data, index) => {
+            const coinGroup = new THREE.Group();
 
-        // Add particles around coin
+            // Coin body
+            const coinGeometry = new THREE.CylinderGeometry(1, 1, 0.2, 64);
+            const coinMaterial = new THREE.MeshStandardMaterial({
+                color: data.color,
+                metalness: 0.9,
+                roughness: 0.1,
+                emissive: data.emissive,
+                emissiveIntensity: 0.3
+            });
+            const coin = new THREE.Mesh(coinGeometry, coinMaterial);
+            coin.rotation.x = Math.PI / 2;
+            coinGroup.add(coin);
+
+            // Coin edge (rim)
+            const edgeGeometry = new THREE.TorusGeometry(1, 0.12, 16, 64);
+            const edgeMaterial = new THREE.MeshStandardMaterial({
+                color: 0xffffff,
+                metalness: 1,
+                roughness: 0,
+                emissive: 0xffffff,
+                emissiveIntensity: 0.5
+            });
+            const edge = new THREE.Mesh(edgeGeometry, edgeMaterial);
+            edge.position.z = 0.1;
+            coinGroup.add(edge);
+
+            // Logo ring
+            const logoGeometry = new THREE.TorusGeometry(0.6, 0.08, 16, 64);
+            const logoMaterial = new THREE.MeshStandardMaterial({
+                color: 0xffffff,
+                metalness: 1,
+                roughness: 0.1,
+                emissive: 0xffffff,
+                emissiveIntensity: 0.4
+            });
+            const logo = new THREE.Mesh(logoGeometry, logoMaterial);
+            logo.position.z = 0.15;
+            coinGroup.add(logo);
+
+            coinGroup.position.set(data.position[0], data.position[1], data.position[2]);
+            coinGroup.scale.setScalar(data.scale);
+            scene.add(coinGroup);
+            coins.push(coinGroup);
+        });
+
+        // Enhanced particle system
         const particlesGeometry = new THREE.BufferGeometry();
-        const particlesCount = 1000;
+        const particlesCount = 2000;
         const posArray = new Float32Array(particlesCount * 3);
+        const colorArray = new Float32Array(particlesCount * 3);
 
-        for (let i = 0; i < particlesCount * 3; i++) {
-            posArray[i] = (Math.random() - 0.5) * 20;
+        for (let i = 0; i < particlesCount; i++) {
+            posArray[i * 3] = (Math.random() - 0.5) * 30;
+            posArray[i * 3 + 1] = (Math.random() - 0.5) * 30;
+            posArray[i * 3 + 2] = (Math.random() - 0.5) * 30;
+
+            // Random colors
+            const colors = [
+                [0.65, 0.55, 0.98], // Purple
+                [0.29, 0.87, 0.50], // Green
+                [0.13, 0.83, 0.93], // Cyan
+                [0.97, 0.73, 0.10]  // Gold
+            ];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            colorArray[i * 3] = color[0];
+            colorArray[i * 3 + 1] = color[1];
+            colorArray[i * 3 + 2] = color[2];
         }
 
         particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colorArray, 3));
+
         const particlesMaterial = new THREE.PointsMaterial({
-            size: 0.05,
-            color: 0xa78bfa,
+            size: 0.08,
+            vertexColors: true,
             transparent: true,
             opacity: 0.8,
-            blending: THREE.AdditiveBlending
+            blending: THREE.AdditiveBlending,
+            sizeAttenuation: true
         });
 
         const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
         scene.add(particlesMesh);
 
-        // Add lights
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        // Enhanced lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
         scene.add(ambientLight);
 
-        const pointLight1 = new THREE.PointLight(0xa78bfa, 2, 100);
-        pointLight1.position.set(5, 5, 5);
-        scene.add(pointLight1);
+        // Multiple colored lights
+        const lights = [
+            { color: 0xa78bfa, position: [8, 8, 8], intensity: 3 },
+            { color: 0x4ade80, position: [-8, -8, 8], intensity: 3 },
+            { color: 0x22d3ee, position: [0, 8, -8], intensity: 3 },
+            { color: 0xf7931a, position: [8, -8, -8], intensity: 2 },
+            { color: 0xfbbf24, position: [-8, 8, -8], intensity: 2 }
+        ];
 
-        const pointLight2 = new THREE.PointLight(0x4ade80, 2, 100);
-        pointLight2.position.set(-5, -5, 5);
-        scene.add(pointLight2);
+        const pointLights: THREE.PointLight[] = [];
+        lights.forEach(light => {
+            const pointLight = new THREE.PointLight(light.color, light.intensity, 100);
+            pointLight.position.set(light.position[0], light.position[1], light.position[2]);
+            scene.add(pointLight);
+            pointLights.push(pointLight);
+        });
 
-        const pointLight3 = new THREE.PointLight(0x22d3ee, 2, 100);
-        pointLight3.position.set(0, 5, -5);
-        scene.add(pointLight3);
-
-        camera.position.z = 8;
+        camera.position.z = 12;
+        camera.position.y = 2;
 
         // Mouse interaction
         let mouseX = 0;
         let mouseY = 0;
+        let targetX = 0;
+        let targetY = 0;
 
         const handleMouseMove = (event: MouseEvent) => {
             mouseX = (event.clientX / window.innerWidth) * 2 - 1;
@@ -100,30 +158,49 @@ export default function ThreeJSShowcase() {
             requestAnimationFrame(animate);
             time += 0.01;
 
-            // Rotate coin
-            coin.rotation.y += 0.01;
-            coin.rotation.z = Math.sin(time) * 0.1;
+            // Smooth camera follow
+            targetX += (mouseX * 2 - targetX) * 0.05;
+            targetY += (mouseY * 2 - targetY) * 0.05;
+            camera.position.x = targetX;
+            camera.position.y = 2 + targetY;
+            camera.lookAt(0, 0, 0);
 
-            // Floating animation
-            coin.position.y = Math.sin(time * 0.5) * 0.5;
+            // Animate coins
+            coins.forEach((coin, index) => {
+                // Rotation
+                coin.rotation.y += 0.01 + index * 0.002;
+                coin.rotation.z = Math.sin(time + index) * 0.1;
 
-            // Mouse parallax
-            coin.rotation.x = mouseY * 0.3;
-            coin.rotation.y += mouseX * 0.01;
+                // Floating
+                const floatSpeed = 0.5 + index * 0.1;
+                const floatAmount = 0.3 + index * 0.1;
+                coin.position.y += Math.sin(time * floatSpeed + index) * 0.01;
+
+                // Orbit for non-center coins
+                if (index > 0) {
+                    const orbitSpeed = 0.2 + index * 0.05;
+                    const orbitRadius = 4 + index * 0.5;
+                    const angle = time * orbitSpeed + index * Math.PI / 2;
+                    coin.position.x = Math.cos(angle) * orbitRadius;
+                    coin.position.z = Math.sin(angle) * orbitRadius - 2;
+                }
+            });
 
             // Rotate particles
-            particlesMesh.rotation.y += 0.001;
-            particlesMesh.rotation.x += 0.0005;
+            particlesMesh.rotation.y += 0.0005;
+            particlesMesh.rotation.x += 0.0003;
 
             // Animate lights
-            pointLight1.position.x = Math.sin(time) * 5;
-            pointLight1.position.y = Math.cos(time) * 5;
+            pointLights.forEach((light, index) => {
+                const angle = time * (0.3 + index * 0.1) + index * Math.PI / 2;
+                const radius = 8 + Math.sin(time + index) * 2;
+                light.position.x = Math.cos(angle) * radius;
+                light.position.z = Math.sin(angle) * radius;
+                light.position.y = Math.sin(time * 0.5 + index) * 5;
 
-            pointLight2.position.x = Math.cos(time * 0.7) * 5;
-            pointLight2.position.z = Math.sin(time * 0.7) * 5;
-
-            pointLight3.position.y = Math.sin(time * 0.5) * 5;
-            pointLight3.position.z = Math.cos(time * 0.5) * 5;
+                // Pulse intensity
+                light.intensity = 2 + Math.sin(time * 2 + index) * 1;
+            });
 
             renderer.render(scene, camera);
         };
@@ -152,10 +229,13 @@ export default function ThreeJSShowcase() {
             ref={containerRef}
             style={{
                 width: '100%',
-                height: '600px',
+                height: '700px',
                 position: 'relative',
-                borderRadius: '1rem',
-                overflow: 'hidden'
+                borderRadius: '1.5rem',
+                overflow: 'hidden',
+                background: 'linear-gradient(135deg, rgba(10,10,20,0.8), rgba(20,20,40,0.8))',
+                border: '1px solid rgba(255,255,255,0.1)',
+                boxShadow: '0 20px 60px rgba(0,0,0,0.5)'
             }}
         />
     );

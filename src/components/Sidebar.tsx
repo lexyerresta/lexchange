@@ -6,7 +6,10 @@ import styles from './Sidebar.module.css';
 export default function Sidebar({ isOpen, toggle }: { isOpen: boolean; toggle: () => void }) {
     return (
         <>
-            <div className={`${styles.sidebar} ${isOpen ? styles.open : ''}`}>
+            <div
+                className={`${styles.sidebar} ${isOpen ? styles.open : ''}`}
+                style={{ display: isOpen ? 'block' : 'none' }}
+            >
                 <div className={styles.logo}>
                     <div className={styles.logoIcon}>L</div>
                     <span className={styles.logoText}>Lexchange</span>
