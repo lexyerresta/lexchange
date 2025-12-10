@@ -31,6 +31,8 @@ export default function Sidebar({ isOpen, toggle }: { isOpen: boolean; toggle: (
                     <NavItem href="/transactions" icon={<span className={styles.chainIcon}>📜</span>} label="Transactions" />
 
                     <div className={styles.sectionTitle}>Advanced</div>
+                    <NavItem href="/ai-trader" icon={<span className={styles.chainIcon}>🤖</span>} label="AI Trader Chat" highlight />
+                    <NavItem href="/trading-bots" icon={<span className={styles.chainIcon}>⚙️</span>} label="Trading Bots" highlight />
                     <NavItem href="/ai-insights" icon={<span className={styles.chainIcon}>🧠</span>} label="AI Insights" highlight />
                     <NavItem href="/social-trading" icon={<span className={styles.chainIcon}>👥</span>} label="Social Trading" highlight />
                     <NavItem href="/market-intel" icon={<span className={styles.chainIcon}>👁️</span>} label="Market Intel" highlight />
