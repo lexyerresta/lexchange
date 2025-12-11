@@ -10,16 +10,14 @@ export default function SatoshiMysteryShowcase() {
     useEffect(() => {
         if (!mountRef.current) return;
 
-        // --- SCENE SETUP - THUNDEROUS MODE ---
+        // --- SCENE SETUP ---
         const scene = new THREE.Scene();
-        // Deep void with electric fog
-        const fogColor = new THREE.Color(0x020205);
-        scene.fog = new THREE.FogExp2(fogColor.getHex(), 0.03);
-        scene.background = fogColor;
+        // Cyberpunk Void
+        scene.fog = new THREE.FogExp2(0x000205, 0.02);
+        scene.background = new THREE.Color(0x000205);
 
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.z = 5.5;
-        camera.position.y = 0.5;
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
+        camera.position.set(0, 5, 20);
 
         const renderer = new THREE.WebGLRenderer({
             alpha: true,
@@ -28,235 +26,205 @@ export default function SatoshiMysteryShowcase() {
         });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        // Simple tone mapping to handle bright lights
-        renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.2;
         mountRef.current.appendChild(renderer.domElement);
 
-        // --- SATOSHI FIGURE GROUP ---
-        const figureGroup = new THREE.Group();
-        scene.add(figureGroup);
+        // --- GENESIS BLOCK & CHAIN ---
+        const blocks: THREE.Mesh[] = [];
+        const links: THREE.Line[] = [];
 
-        // 1. THE HOOD (Outer Shell) - Glossy obsidian
-        const hoodGeo = new THREE.SphereGeometry(1.6, 64, 64, 0, Math.PI * 2, 0, Math.PI * 0.65);
-        const hoodMat = new THREE.MeshPhysicalMaterial({
-            color: 0x050510,
-            roughness: 0.2,
+        // Block Geometry: A cube with slightly beveled edges (simulated) or just wireframe overlay
+        const boxGeo = new THREE.BoxGeometry(2, 2, 2);
+        const edgesGeo = new THREE.EdgesGeometry(boxGeo);
+
+        // Materials
+        const blockMat = new THREE.MeshPhysicalMaterial({
+            color: 0x000000,
+            emissive: 0x22d3ee,
+            emissiveIntensity: 0.2, // Enhanced glow
             metalness: 0.9,
-            clearcoat: 1.0,
-            clearcoatRoughness: 0.1,
-            side: THREE.BackSide,
-            emissive: 0x1a1a40,
-            emissiveIntensity: 0.5
+            roughness: 0.1,
+            transparent: true,
+            opacity: 0.9,
+            transmission: 0.5, // Glass-like
         });
-        const hood = new THREE.Mesh(hoodGeo, hoodMat);
-        hood.rotation.x = -Math.PI / 2.2;
-        hood.scale.z = 1.2;
-        figureGroup.add(hood);
 
-        // 2. THE VOID (Inner Face) - Pure blackhole
-        const faceGeo = new THREE.SphereGeometry(1.3, 32, 32);
-        const faceMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
-        const face = new THREE.Mesh(faceGeo, faceMat);
-        face.position.y = 0.2;
-        face.position.z = -0.3;
-        figureGroup.add(face);
-
-        // 3. SHOULDER DRAPE
-        const shoulderGeo = new THREE.CylinderGeometry(0.5, 2.8, 3.5, 32, 1, true);
-        const shoulderMat = new THREE.MeshStandardMaterial({
-            color: 0x080816,
-            roughness: 0.5,
-            metalness: 0.8,
-            side: THREE.DoubleSide
+        const wireMat = new THREE.LineBasicMaterial({ color: 0x22d3ee, transparent: true, opacity: 0.5 });
+        const genesisMat = new THREE.MeshPhysicalMaterial({
+            color: 0xffd700, // Gold for Genesis
+            emissive: 0xffa500,
+            emissiveIntensity: 0.5,
+            metalness: 1,
+            roughness: 0.1
         });
-        const shoulders = new THREE.Mesh(shoulderGeo, shoulderMat);
-        shoulders.position.y = -2.2;
-        figureGroup.add(shoulders);
+        const genesisWireMat = new THREE.LineBasicMaterial({ color: 0xffd700 });
 
-        // 4. DIGITAL STORM PARTICLES (Menggelegar Mode)
-        const particleCount = 5000; // Increased count
+        // Create Chain
+        const createBlock = (x: number, y: number, z: number, isGenesis = false) => {
+            const mesh = new THREE.Mesh(boxGeo, isGenesis ? genesisMat : blockMat);
+            mesh.position.set(x, y, z);
+
+            // Add wireframe outline
+            const edges = new THREE.LineSegments(edgesGeo, isGenesis ? genesisWireMat : wireMat);
+            mesh.add(edges);
+
+            // Add inner pulsing core
+            const coreGeo = new THREE.IcosahedronGeometry(isGenesis ? 0.8 : 0.6, 0);
+            const coreMat = new THREE.MeshBasicMaterial({
+                color: isGenesis ? 0xffffff : 0x22d3ee,
+                wireframe: true
+            });
+            const core = new THREE.Mesh(coreGeo, coreMat);
+            mesh.add(core);
+
+            // Metadata text (simulated as floating planes)
+            const planeGeo = new THREE.PlaneGeometry(1.5, 0.5);
+            const planeMat = new THREE.MeshBasicMaterial({
+                color: isGenesis ? 0xffd700 : 0x22d3ee,
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: 0.3
+            });
+
+            // Random floating data planes above block
+            for (let i = 0; i < 3; i++) {
+                const p = new THREE.Mesh(planeGeo, planeMat);
+                p.position.set(
+                    (Math.random() - 0.5) * 2.5,
+                    1.5 + Math.random(),
+                    (Math.random() - 0.5) * 2.5
+                );
+                p.rotation.set(Math.random(), Math.random(), Math.random());
+                p.scale.setScalar(0.5);
+                mesh.add(p);
+            }
+
+            scene.add(mesh);
+            blocks.push(mesh);
+            return mesh;
+        };
+
+        // Generate Infinite-like Chain
+        // We'll create a curve to place blocks along
+        const curvePoints = [];
+        for (let i = 0; i < 50; i++) {
+            // Spiral helix shape
+            const t = i * 0.5;
+            curvePoints.push(new THREE.Vector3(
+                Math.cos(t) * 10,
+                i * -2 + 10, // Going down
+                Math.sin(t) * 10
+            ));
+        }
+        const curve = new THREE.CatmullRomCurve3(curvePoints);
+
+        // Place blocks along curve
+        const blockCount = 20;
+        for (let i = 0; i < blockCount; i++) {
+            const t = i / (blockCount - 1);
+            const pos = curve.getPoint(t);
+            const isGenesis = i === 0;
+            const block = createBlock(pos.x, pos.y, pos.z, isGenesis);
+
+            block.lookAt(curve.getPoint(Math.min(t + 0.01, 1))); // Face forward
+
+            // Connect with beam
+            if (i > 0) {
+                const prevPos = blocks[i - 1].position;
+                const geometry = new THREE.BufferGeometry().setFromPoints([prevPos, pos]);
+                const material = new THREE.LineBasicMaterial({
+                    color: 0x4ade80, // Green data link
+                    transparent: true,
+                    opacity: 0.3
+                });
+                const line = new THREE.Line(geometry, material);
+                scene.add(line);
+                links.push(line);
+            }
+        }
+
+        // --- DATA PARTICLES ---
+        // Floating 0s and 1s simulation (Points)
+        const particleCount = 2000;
         const pGeo = new THREE.BufferGeometry();
         const pPos = new Float32Array(particleCount * 3);
-        const pSizes = new Float32Array(particleCount);
-        const pColors = new Float32Array(particleCount * 3);
-
-        const color1 = new THREE.Color(0x22d3ee); // Cyan
-        const color2 = new THREE.Color(0xa78bfa); // Purple
-        const color3 = new THREE.Color(0xffffff); // White sparks
+        const pSpeed = new Float32Array(particleCount); // custom attribute for speed
 
         for (let i = 0; i < particleCount; i++) {
-            const r = 2.5 + Math.random() * 3;
-            const theta = Math.random() * Math.PI * 2;
-            const phi = Math.random() * Math.PI;
-
-            pPos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
-            pPos[i * 3 + 1] = (r * Math.cos(phi) - 0.5) * 1.5; // Stretch vertically
-            pPos[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta);
-
-            pSizes[i] = Math.random() < 0.1 ? 0.08 : 0.03; // Occasional large sparks
-
-            // Mix colors
-            const mixedColor = Math.random() > 0.5 ? color1 : color2;
-            if (Math.random() > 0.95) mixedColor.copy(color3); // Flash sparks
-
-            pColors[i * 3] = mixedColor.r;
-            pColors[i * 3 + 1] = mixedColor.g;
-            pColors[i * 3 + 2] = mixedColor.b;
+            pPos[i * 3] = (Math.random() - 0.5) * 60; // Wide spread X
+            pPos[i * 3 + 1] = (Math.random() - 0.5) * 60; // Wide spread Y
+            pPos[i * 3 + 2] = (Math.random() - 0.5) * 60; // Wide spread Z
+            pSpeed[i] = 0.02 + Math.random() * 0.05;
         }
-
         pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
-        pGeo.setAttribute('size', new THREE.BufferAttribute(pSizes, 1));
-        pGeo.setAttribute('color', new THREE.BufferAttribute(pColors, 3));
 
         const pMat = new THREE.PointsMaterial({
-            vertexColors: true,
+            color: 0x22d3ee,
+            size: 0.15,
             transparent: true,
-            opacity: 0.8,
-            blending: THREE.AdditiveBlending,
-            sizeAttenuation: true
+            opacity: 0.6,
+            blending: THREE.AdditiveBlending
         });
-        const particleSystem = new THREE.Points(pGeo, pMat);
-        figureGroup.add(particleSystem);
+        const particles = new THREE.Points(pGeo, pMat);
+        scene.add(particles);
 
-        // 5. ENERGY RINGS (Orbiting)
-        const coins: THREE.Group[] = [];
-        const ringCount = 8;
-        const orbitRadius = 4.5;
-
-        for (let i = 0; i < ringCount; i++) {
-            const group = new THREE.Group();
-
-            // Glowing simple geometry
-            const geo = new THREE.TorusGeometry(0.3, 0.02, 8, 32);
-            const mat = new THREE.MeshBasicMaterial({
-                color: i % 2 === 0 ? 0x22d3ee : 0xa78bfa,
-                transparent: true,
-                opacity: 0.8
-            });
-            const mesh = new THREE.Mesh(geo, mat);
-
-            group.add(mesh);
-
-            // Random initial placement
-            const angle = (i / ringCount) * Math.PI * 2;
-            group.position.set(
-                Math.cos(angle) * orbitRadius,
-                (Math.random() - 0.5) * 3,
-                Math.sin(angle) * orbitRadius
-            );
-
-            group.userData = {
-                angle: angle,
-                speed: 0.01 + Math.random() * 0.02,
-                wobble: Math.random() * Math.PI
-            };
-
-            scene.add(group);
-            coins.push(group);
-        }
-
-        // --- LIGHTING (EXTREME) ---
+        // --- LIGHTING ---
         const ambientLight = new THREE.AmbientLight(0x111122, 1);
         scene.add(ambientLight);
 
-        // Thunder Light 1 (Cyan)
-        const thunderLight1 = new THREE.PointLight(0x00ffff, 0, 50);
-        thunderLight1.position.set(5, 5, 5);
-        scene.add(thunderLight1);
+        // Moving data light
+        const dataLight = new THREE.PointLight(0x00ff00, 2, 20);
+        scene.add(dataLight);
 
-        // Thunder Light 2 (Purple)
-        const thunderLight2 = new THREE.PointLight(0xff00ff, 0, 50);
-        thunderLight2.position.set(-5, 5, -5);
-        scene.add(thunderLight2);
+        // Genesis light
+        const genesisLight = new THREE.PointLight(0xffd700, 2, 30);
+        genesisLight.position.copy(blocks[0].position);
+        scene.add(genesisLight);
 
-        // Rim Light (Constant)
-        const rimLight = new THREE.SpotLight(0x6366f1, 20);
-        rimLight.position.set(0, 5, -5);
-        rimLight.lookAt(0, 0, 0);
-        scene.add(rimLight);
-
-        // Void Light (Inner Glow)
-        const voidLight = new THREE.PointLight(0xffffff, 2, 5);
-        voidLight.position.set(0, 0.5, 0);
-        figureGroup.add(voidLight);
-
-        // --- ANIMATION LOOP ---
+        // --- ANIMATION ---
         const clock = new THREE.Clock();
-        let thunderTimer = 0;
 
         const animate = () => {
             const time = clock.getElapsedTime();
-            const delta = clock.getDelta(); // Not used but good practice
 
-            // 1. THUNDER EFFECT (Menggelegar)
-            // Randomly flash lights
-            if (Math.random() > 0.97) {
-                thunderLight1.intensity = 30 + Math.random() * 50;
-                // Shake camera slightly on thunder
-                camera.position.x += (Math.random() - 0.5) * 0.1;
-                camera.position.y += (Math.random() - 0.5) * 0.1;
-            } else {
-                thunderLight1.intensity *= 0.8; // Fast decay
-            }
+            // 1. Move Camera along curve (Flythrough)
+            // Loop the flythrough 
+            const loopTime = 60; // seconds for full loop
+            const t = (time % loopTime) / loopTime;
 
-            if (Math.random() > 0.98) {
-                thunderLight2.intensity = 30 + Math.random() * 50;
-            } else {
-                thunderLight2.intensity *= 0.8;
-            }
-            // Stabilize camera return
-            camera.position.x += (0 - camera.position.x) * 0.05;
-            camera.position.y += (0.5 - camera.position.y) * 0.05;
+            // Camera follows curve but with offset
+            const camPos = curve.getPointAt(t);
+            const lookAtPos = curve.getPointAt(Math.min(t + 0.05, 1)); // Look ahead
 
+            // Smooth dampened movement
+            camera.position.x += (camPos.x + 5 - camera.position.x) * 0.02;
+            camera.position.y += (camPos.y + 2 - camera.position.y) * 0.02;
+            camera.position.z += (camPos.z + 5 - camera.position.z) * 0.02;
+            camera.lookAt(lookAtPos);
 
-            // 2. FIGURE ANIMATION
-            figureGroup.position.y = Math.sin(time * 0.8) * 0.3;
-            figureGroup.rotation.y = Math.sin(time * 0.3) * 0.2;
+            // 2. Animate Blocks
+            blocks.forEach((block, idx) => {
+                block.rotation.x = Math.sin(time + idx) * 0.2;
+                block.rotation.y += 0.01;
 
-            // "Breathing" scale - glitches occasionally
-            const glitch = Math.random() > 0.99 ? 1.05 : 1;
-            figureGroup.scale.setScalar(1 + Math.sin(time * 2) * 0.02 * glitch);
-
-
-            // 3. PARTICLE VORTEX
-            const positions = particleSystem.geometry.attributes.position.array as Float32Array;
-            for (let i = 0; i < particleCount; i++) {
-                // Spiral UP
-                positions[i * 3 + 1] += 0.02;
-
-                // Rotate around Y
-                const x = positions[i * 3];
-                const z = positions[i * 3 + 2];
-                const angle = 0.01;
-                positions[i * 3] = x * Math.cos(angle) - z * Math.sin(angle);
-                positions[i * 3 + 2] = x * Math.sin(angle) + z * Math.cos(angle);
-
-                // Reset check
-                if (positions[i * 3 + 1] > 6) {
-                    positions[i * 3 + 1] = -6;
-                }
-            }
-            particleSystem.geometry.attributes.position.needsUpdate = true;
-
-
-            // 4. ORBITING RINGS
-            coins.forEach(group => {
-                const data = group.userData;
-                data.angle += data.speed;
-
-                // Elliptical chaotic orbit
-                group.position.x = Math.cos(data.angle) * orbitRadius;
-                group.position.z = Math.sin(data.angle) * orbitRadius;
-                group.position.y = Math.sin(time * 2 + data.wobble) * 2;
-
-                group.rotation.x += 0.05;
-                group.rotation.y += 0.05;
+                // Pulse size
+                const scale = 1 + Math.sin(time * 2 + idx) * 0.05;
+                block.scale.setScalar(scale);
             });
 
+            // 3. Move Data Particles (Matrix Rain effect vertically)
+            const positions = particles.geometry.attributes.position.array as Float32Array;
+            for (let i = 0; i < particleCount; i++) {
+                positions[i * 3 + 1] -= pSpeed[i]; // Fall down
+                if (positions[i * 3 + 1] < -30) {
+                    positions[i * 3 + 1] = 30; // Reset to top
+                }
+            }
+            particles.geometry.attributes.position.needsUpdate = true;
 
-            // 5. VOID PULSE
-            voidLight.intensity = 2 + Math.sin(time * 10) * 1.5; // Fast electric pulse
+            // 4. Data Light travels through chain
+            const lightT = (time * 0.2) % 1; // Faster than camera
+            const lightPos = curve.getPointAt(lightT);
+            dataLight.position.copy(lightPos);
 
             renderer.render(scene, camera);
             requestAnimationFrame(animate);
@@ -286,12 +254,11 @@ export default function SatoshiMysteryShowcase() {
             height: '100vh',
             position: 'relative',
             overflow: 'hidden',
-            background: 'radial-gradient(circle at center, #1e1e2f 0%, #000 100%)' // Subtle purple tint
         }}>
-            {/* 3D Container - Behind everything */}
+            {/* 3D Canvas */}
             <div ref={mountRef} style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, zIndex: 0 }} />
 
-            {/* Overlay Text - Glitchy Tech Style */}
+            {/* Overlay UI */}
             <div style={{
                 position: 'absolute',
                 top: '50%',
@@ -299,64 +266,64 @@ export default function SatoshiMysteryShowcase() {
                 transform: 'translate(-50%, -50%)',
                 textAlign: 'center',
                 color: 'white',
-                pointerEvents: 'none', // Allow clicks to pass through to canvas if interactable
                 zIndex: 10,
                 width: '100%',
-                padding: '0 20px',
-                mixBlendMode: 'overlay' // Cool blend effect with the 3D scene
+                pointerEvents: 'none'
             }}>
                 <motion.div
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.8 }}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 1 }}
                 >
                     <h2 style={{
-                        fontSize: 'clamp(3rem, 8vw, 6rem)',
-                        fontWeight: '900',
-                        letterSpacing: '-0.05em',
-                        color: '#fff',
-                        marginBottom: '1rem',
-                        textShadow: '0 0 50px rgba(167, 139, 250, 0.8), 0 0 20px rgba(34, 211, 238, 0.8)',
-                        // Emulate glitch text via duplicate layers if needed, simplified here
+                        fontSize: 'clamp(3rem, 6vw, 5rem)',
+                        fontWeight: '800',
+                        color: 'transparent',
+                        WebkitTextStroke: '1px rgba(255,255,255,0.3)',
+                        marginBottom: '0',
+                        letterSpacing: '0.2em'
                     }}>
-                        SATOSHI <span style={{ color: '#22d3ee' }}>NAKAMOTO</span>
+                        BLOCKCHAIN
                     </h2>
-
-                    <div style={{
-                        background: 'rgba(0,0,0,0.4)',
-                        backdropFilter: 'blur(4px)',
-                        padding: '1.5rem',
-                        borderTop: '1px solid rgba(255,255,255,0.2)',
-                        borderBottom: '1px solid rgba(255,255,255,0.2)',
-                        maxWidth: '800px',
-                        margin: '35vh auto 0', // Push text down significantly
-                        borderRadius: '0'
+                    <h2 style={{
+                        fontSize: 'clamp(3rem, 6vw, 5rem)',
+                        fontWeight: '900',
+                        color: '#fff',
+                        marginTop: '-0.5em',
+                        textShadow: '0 0 40px #22d3ee',
+                        letterSpacing: '0.2em'
                     }}>
-                        <p style={{
-                            fontSize: 'clamp(1rem, 2vw, 1.25rem)',
-                            color: '#e2e8f0',
-                            fontFamily: 'monospace',
-                            letterSpacing: '0.1em',
-                            textTransform: 'uppercase'
-                        }}>
-                             /// DIGITAL GHOST DETECTED ///
-                        </p>
-                    </div>
+                        GENESIS
+                    </h2>
+                    <p style={{
+                        fontSize: '1.2rem',
+                        color: '#94a3b8',
+                        maxWidth: '600px',
+                        margin: '2rem auto',
+                        background: 'rgba(0,0,0,0.6)',
+                        padding: '1rem',
+                        backdropFilter: 'blur(5px)',
+                        borderLeft: '2px solid #22d3ee'
+                    }}>
+                        Witness the immutable ledger. Where every block tells a story, and every hash secures the future.
+                    </p>
                 </motion.div>
             </div>
 
-            {/* Vignette Overlay */}
+            {/* Tech Decoration */}
             <div style={{
                 position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                background: 'radial-gradient(circle at center, transparent 30%, black 100%)',
-                pointerEvents: 'none',
-                zIndex: 5
-            }} />
+                bottom: '40px',
+                left: '40px',
+                color: '#22d3ee',
+                fontFamily: 'monospace',
+                fontSize: '0.8rem',
+                zIndex: 10
+            }}>
+                <p>BLOCK_HEIGHT: 832,104</p>
+                <p>HASH_RATE: 542 EH/s</p>
+                <p>STATUS: SYNCED</p>
+            </div>
         </section>
     );
 }
-
