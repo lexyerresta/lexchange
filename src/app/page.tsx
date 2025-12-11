@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import MarketTable from "@/components/MarketTable";
@@ -17,61 +16,109 @@ import DysonSwarmWidget from "@/components/DysonSwarmWidget";
 import LoadingScreen from "@/components/LoadingScreen";
 import StatsGrid from "@/components/StatsGrid";
 import { Zap, Shield, TrendingUp, Users, Bot, Eye } from 'lucide-react';
+import { motion } from 'framer-motion';
+
+// --- STATIC DATA ---
+const FEATURES = [
+  {
+    icon: <Bot size={32} />,
+    title: 'AI Trading Assistant',
+    description: 'Chat with AI to get real-time market insights, trade recommendations, and portfolio analysis.',
+    color: '#a78bfa',
+    gradient: 'linear-gradient(135deg, rgba(167,139,250,0.1), rgba(139,92,246,0.1))'
+  },
+  {
+    icon: <Zap size={32} />,
+    title: 'Auto Trading Bots',
+    description: 'Set up automated trading strategies with DCA, Grid Trading, Momentum, and Arbitrage bots.',
+    color: '#fbbf24',
+    gradient: 'linear-gradient(135deg, rgba(251,191,36,0.1), rgba(245,158,11,0.1))'
+  },
+  {
+    icon: <Eye size={32} />,
+    title: 'Whale Tracking',
+    description: 'Monitor large transactions in real-time and get alerts when whales move the market.',
+    color: '#22d3ee',
+    gradient: 'linear-gradient(135deg, rgba(34,211,238,0.1), rgba(6,182,212,0.1))'
+  },
+  {
+    icon: <Users size={32} />,
+    title: 'Social Trading',
+    description: 'Copy trades from top performers automatically and learn from the best traders.',
+    color: '#f472b6',
+    gradient: 'linear-gradient(135deg, rgba(244,114,182,0.1), rgba(236,72,153,0.1))'
+  },
+  {
+    icon: <Shield size={32} />,
+    title: 'Secure & Fast',
+    description: 'Industry-leading security with lightning-fast execution and zero-latency trading.',
+    color: '#4ade80',
+    gradient: 'linear-gradient(135deg, rgba(74,222,128,0.1), rgba(34,197,94,0.1))'
+  },
+  {
+    icon: <TrendingUp size={32} />,
+    title: 'Advanced Analytics',
+    description: 'Multi-chart analysis, price alerts, and comprehensive market intelligence tools.',
+    color: '#a78bfa',
+    gradient: 'linear-gradient(135deg, rgba(167,139,250,0.1), rgba(139,92,246,0.1))'
+  }
+];
+
+// --- REUSABLE COMPONENTS ---
+const Section = ({ children, style = {} }: { children: React.ReactNode, style?: React.CSSProperties }) => (
+  <motion.section
+    initial={{ opacity: 0, y: 50 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true, margin: "-100px" }}
+    transition={{ duration: 0.8, ease: "easeOut" }}
+    style={{
+      padding: '4rem 2rem',
+      maxWidth: '1400px',
+      margin: '0 auto',
+      ...style
+    }}
+  >
+    {children}
+  </motion.section>
+);
+
+const SectionHeader = ({ title, highlight, subtitle, badge, badgeColor }: any) => (
+  <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+    {badge && (
+      <div style={{
+        display: 'inline-block',
+        padding: '5px 15px',
+        borderRadius: '20px',
+        background: `${badgeColor}1a`, // 10% opacity hex
+        color: badgeColor,
+        fontSize: '0.8rem',
+        fontWeight: 'bold',
+        border: `1px solid ${badgeColor}4d`, // 30% opacity hex
+        marginBottom: '1rem'
+      }}>
+        {badge}
+      </div>
+    )}
+    <h2 style={{
+      fontSize: 'clamp(2rem, 5vw, 3rem)',
+      fontWeight: '800',
+      marginBottom: '1rem',
+      background: 'linear-gradient(135deg, #fff 0%, #94a3b8 100%)',
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+      backgroundClip: 'text',
+      textShadow: badgeColor ? `0 0 30px ${badgeColor}33` : 'none'
+    }}>
+      {title} <span style={{ color: badgeColor || '#a78bfa', WebkitTextFillColor: badgeColor || '#a78bfa' }}>{highlight}</span>
+    </h2>
+    <p style={{ color: '#94a3b8', fontSize: '1.2rem', maxWidth: '700px', margin: '0 auto' }}>
+      {subtitle}
+    </p>
+  </div>
+);
+
 
 export default function Home() {
-  const [scrollY, setScrollY] = useState(0);
-
-  useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const features = [
-    {
-      icon: <Bot size={32} />,
-      title: 'AI Trading Assistant',
-      description: 'Chat with AI to get real-time market insights, trade recommendations, and portfolio analysis.',
-      color: '#a78bfa',
-      gradient: 'linear-gradient(135deg, rgba(167,139,250,0.1), rgba(139,92,246,0.1))'
-    },
-    {
-      icon: <Zap size={32} />,
-      title: 'Auto Trading Bots',
-      description: 'Set up automated trading strategies with DCA, Grid Trading, Momentum, and Arbitrage bots.',
-      color: '#fbbf24',
-      gradient: 'linear-gradient(135deg, rgba(251,191,36,0.1), rgba(245,158,11,0.1))'
-    },
-    {
-      icon: <Eye size={32} />,
-      title: 'Whale Tracking',
-      description: 'Monitor large transactions in real-time and get alerts when whales move the market.',
-      color: '#22d3ee',
-      gradient: 'linear-gradient(135deg, rgba(34,211,238,0.1), rgba(6,182,212,0.1))'
-    },
-    {
-      icon: <Users size={32} />,
-      title: 'Social Trading',
-      description: 'Copy trades from top performers automatically and learn from the best traders.',
-      color: '#f472b6',
-      gradient: 'linear-gradient(135deg, rgba(244,114,182,0.1), rgba(236,72,153,0.1))'
-    },
-    {
-      icon: <Shield size={32} />,
-      title: 'Secure & Fast',
-      description: 'Industry-leading security with lightning-fast execution and zero-latency trading.',
-      color: '#4ade80',
-      gradient: 'linear-gradient(135deg, rgba(74,222,128,0.1), rgba(34,197,94,0.1))'
-    },
-    {
-      icon: <TrendingUp size={32} />,
-      title: 'Advanced Analytics',
-      description: 'Multi-chart analysis, price alerts, and comprehensive market intelligence tools.',
-      color: '#a78bfa',
-      gradient: 'linear-gradient(135deg, rgba(167,139,250,0.1), rgba(139,92,246,0.1))'
-    }
-  ];
-
   return (
     <main style={{ position: 'relative', overflow: 'hidden' }}>
       <LoadingScreen />
@@ -81,289 +128,130 @@ export default function Home() {
       <div style={{ position: 'relative', zIndex: 1 }}>
         <Navbar />
         <Hero />
-
-        {/* Live Price Ticker */}
         <LivePriceTicker />
 
-        {/* Stats Section */}
-        <section style={{
-          padding: '4rem 2rem',
-          maxWidth: '1400px',
-          margin: '0 auto'
-        }}>
+        <Section>
           <StatsGrid stats={[
             { value: 2400000000, label: '24h Trading Volume', prefix: '$', decimals: 0, color: '#a78bfa' },
             { value: 24891, label: 'Active Traders', suffix: '+', decimals: 0, color: '#22d3ee' },
             { value: 156, label: 'Average ROI', suffix: '%', decimals: 0, color: '#4ade80' },
             { value: 99.9, label: 'Uptime', suffix: '%', decimals: 1, color: '#fbbf24' }
           ]} />
-        </section>
+        </Section>
 
-        {/* Quick Swap Section */}
-        <section style={{
-          padding: '4rem 2rem',
-          maxWidth: '1400px',
-          margin: '0 auto',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '2rem',
-          transform: `translateY(${Math.max(0, (scrollY - 200) * -0.05)}px)`,
-          opacity: Math.min(1, Math.max(0, (scrollY - 50) / 200))
-        }}>
-          <div style={{ textAlign: 'center' }}>
-            <h2 style={{
-              fontSize: '2rem',
-              fontWeight: '700',
-              color: 'white',
-              marginBottom: '1rem',
-            }}>
-              Instant <span style={{ color: '#a78bfa' }}>Swap</span>
-            </h2>
-            <p style={{ color: '#9ca3af' }}>Zero fees, infinite liquidity, lightning fast.</p>
-          </div>
+        {/* 2024 FEATURE: QUICK SWAP */}
+        <Section style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2rem' }}>
+          <SectionHeader
+            title="Instant"
+            highlight="Swap"
+            subtitle="Zero fees, infinite liquidity, lightning fast."
+          />
           <QuickSwapWidget />
-        </section>
+        </Section>
 
-        {/* 2050 Feature Section */}
-        <section style={{
-          padding: '4rem 2rem',
-          maxWidth: '1400px',
-          margin: '0 auto',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '2rem',
-          transform: `translateY(${Math.max(0, (scrollY - 300) * -0.05)}px)`,
-          opacity: Math.min(1, Math.max(0, (scrollY - 150) / 200))
-        }}>
-          <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
-            <div style={{
-              display: 'inline-block',
-              padding: '5px 15px',
-              borderRadius: '20px',
-              background: 'rgba(34, 211, 238, 0.1)',
-              color: '#22d3ee',
-              fontSize: '0.8rem',
-              fontWeight: 'bold',
-              border: '1px solid rgba(34, 211, 238, 0.3)',
-              marginBottom: '1rem'
-            }}>
-              FEATURE FROM 2050
-            </div>
-            <h2 style={{
-              fontSize: '2.5rem',
-              fontWeight: '800',
-              color: 'white',
-              marginBottom: '1rem',
-              textShadow: '0 0 30px rgba(34, 211, 238, 0.2)'
-            }}>
-              Neuro-Quantum <span style={{ color: '#22d3ee' }}>Interface</span>
-            </h2>
-            <p style={{ color: '#9ca3af', maxWidth: '600px' }}>
-              Direct Brain-Computer Interface (BCI) allowing thought-speed execution.
-              Zero-latency trading powered by quantum entanglement.
-            </p>
-          </div>
+        {/* 2050 FEATURE: NEURO-QUANTUM */}
+        <Section style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2rem' }}>
+          <SectionHeader
+            title="Neuro-Quantum"
+            highlight="Interface"
+            subtitle="Direct Brain-Computer Interface (BCI) allowing thought-speed execution. Zero-latency trading powered by quantum entanglement."
+            badge="FEATURE FROM 2050"
+            badgeColor="#22d3ee"
+          />
           <NeuroQuantumWidget />
-        </section>
+        </Section>
 
-        {/* 2100 Feature Section */}
-        <section style={{
-          padding: '4rem 2rem',
-          maxWidth: '1400px',
-          margin: '0 auto',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '2rem',
-          transform: `translateY(${Math.max(0, (scrollY - 400) * -0.05)}px)`,
-          opacity: Math.min(1, Math.max(0, (scrollY - 250) / 200))
-        }}>
-          <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
-            <div style={{
-              display: 'inline-block',
-              padding: '5px 15px',
-              borderRadius: '20px',
-              background: 'rgba(251, 191, 36, 0.1)',
-              color: '#fbbf24',
-              fontSize: '0.8rem',
-              fontWeight: 'bold',
-              border: '1px solid rgba(251, 191, 36, 0.3)',
-              marginBottom: '1rem'
-            }}>
-              FEATURE FROM 2100
-            </div>
-            <h2 style={{
-              fontSize: '2.5rem',
-              fontWeight: '800',
-              color: 'white',
-              marginBottom: '1rem',
-              textShadow: '0 0 30px rgba(251, 191, 36, 0.2)'
-            }}>
-              Kardashev <span style={{ color: '#fbbf24' }}>Energy Exchange</span>
-            </h2>
-            <p style={{ color: '#9ca3af', maxWidth: '600px' }}>
-              Deploy Type-II Dyson Swarms to harvest direct stellar plasma.
-              Stake stars to earn Universal Energy Credits (UEC).
-            </p>
-          </div>
+        {/* 2100 FEATURE: DYSON SWARM */}
+        <Section style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2rem' }}>
+          <SectionHeader
+            title="Kardashev"
+            highlight="Energy Exchange"
+            subtitle="Deploy Type-II Dyson Swarms to harvest direct stellar plasma. Stake stars to earn Universal Energy Credits (UEC)."
+            badge="FEATURE FROM 2100"
+            badgeColor="#fbbf24"
+          />
           <DysonSwarmWidget />
-        </section>
+        </Section>
 
-        {/* 3D Showcase Section */}
-        <section style={{
-          padding: '6rem 2rem',
-          maxWidth: '1400px',
-          margin: '0 auto',
-          transform: `translateY(${Math.max(0, (scrollY - 300) * -0.08)}px)`,
-          opacity: Math.min(1, Math.max(0, (scrollY - 100) / 300))
-        }}>
-          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-            <h2 style={{
-              fontSize: 'clamp(2rem, 5vw, 3rem)',
-              fontWeight: '800',
-              marginBottom: '1rem',
-              background: 'linear-gradient(135deg, #a78bfa 0%, #22d3ee 50%, #4ade80 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text'
-            }}>
-              The Satoshi Mystery
-            </h2>
-            <p style={{ color: '#94a3b8', fontSize: '1.2rem', maxWidth: '700px', margin: '0 auto 0.5rem' }}>
-              The enigma that started it all
-            </p>
-            <p style={{ color: '#64748b', fontSize: '0.95rem', fontStyle: 'italic' }}>
-              Who is Satoshi Nakamoto? The mystery continues...
-            </p>
-          </div>
-
+        {/* SHOWCASE */}
+        <Section>
+          <SectionHeader
+            title="The Satoshi"
+            highlight="Mystery"
+            subtitle="The enigma that started it all. Who is Satoshi Nakamoto?"
+            badgeColor="#a78bfa"
+          />
           <SatoshiMysteryShowcase />
-        </section>
+        </Section>
 
-        {/* Features Section */}
-        <section style={{
-          padding: '6rem 2rem',
-          maxWidth: '1400px',
-          margin: '0 auto',
-          transform: `translateY(${Math.max(0, (scrollY - 400) * -0.1)}px)`,
-          opacity: Math.min(1, Math.max(0, (scrollY - 200) / 300))
-        }}>
-          <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-            <h2 style={{
-              fontSize: 'clamp(2rem, 5vw, 3rem)',
-              fontWeight: '800',
-              marginBottom: '1rem',
-              background: 'linear-gradient(135deg, #fff 0%, #a78bfa 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text'
-            }}>
-              Revolutionary Features
-            </h2>
-            <p style={{ color: '#94a3b8', fontSize: '1.2rem', maxWidth: '600px', margin: '0 auto' }}>
-              Everything you need to dominate the crypto market
-            </p>
-          </div>
-
+        {/* FEATURES GRID */}
+        <Section>
+          <SectionHeader
+            title="Revolutionary"
+            highlight="Features"
+            subtitle="Everything you need to dominate the crypto market."
+          />
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
             gap: '2rem'
           }}>
-            {features.map((feature, idx) => (
+            {FEATURES.map((feature, idx) => (
               <HolographicCard key={idx} intensity={0.8}>
-                <div
+                <motion.div
                   className="feature-card"
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.1 }}
+                  viewport={{ once: true }}
                   style={{
                     background: feature.gradient,
                     backdropFilter: 'blur(20px)',
                     border: `1px solid ${feature.color}33`,
                     borderRadius: '1.5rem',
                     padding: '2rem',
-                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                    cursor: 'pointer',
-                    transform: `translateY(${Math.max(0, (scrollY - 600 - idx * 50) * -0.05)}px)`,
-                    opacity: Math.min(1, Math.max(0, (scrollY - 400 - idx * 50) / 200))
+                    height: '100%',
+                    cursor: 'pointer'
                   }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-10px) scale(1.02)';
-                    e.currentTarget.style.boxShadow = `0 20px 60px ${feature.color}40`;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0) scale(1)';
-                    e.currentTarget.style.boxShadow = 'none';
-                  }}
+                  whileHover={{ y: -10, scale: 1.02 }}
                 >
                   <div style={{
-                    width: '60px',
-                    height: '60px',
-                    borderRadius: '1rem',
+                    width: '60px', height: '60px', borderRadius: '1rem',
                     background: `${feature.color}22`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginBottom: '1.5rem',
-                    color: feature.color
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    marginBottom: '1.5rem', color: feature.color
                   }}>
                     {feature.icon}
                   </div>
-                  <h3 style={{
-                    fontSize: '1.5rem',
-                    fontWeight: '700',
-                    color: 'white',
-                    marginBottom: '1rem'
-                  }}>
+                  <h3 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'white', marginBottom: '1rem' }}>
                     {feature.title}
                   </h3>
-                  <p style={{
-                    color: '#94a3b8',
-                    lineHeight: '1.6',
-                    fontSize: '1rem'
-                  }}>
+                  <p style={{ color: '#94a3b8', lineHeight: '1.6', fontSize: '1rem' }}>
                     {feature.description}
                   </p>
-                </div>
+                </motion.div>
               </HolographicCard>
             ))}
           </div>
-        </section>
+        </Section>
 
-        {/* Market Table */}
-        <section style={{
-          transform: `translateY(${Math.max(0, (scrollY - 1000) * -0.05)}px)`,
-          opacity: Math.min(1, Math.max(0, (scrollY - 800) / 300))
-        }}>
+        <Section>
           <MarketTable />
-        </section>
+        </Section>
 
         <Footer />
       </div>
 
-      {/* Floating AI Assistant Button */}
       <FloatingAIButton />
 
       <style jsx global>{`
-                .feature-card {
-                    position: relative;
-                    overflow: hidden;
-                }
-
+                .feature-card { position: relative; overflow: hidden; }
                 .feature-card::before {
-                    content: '';
-                    position: absolute;
-                    top: 0;
-                    left: -100%;
-                    width: 100%;
-                    height: 100%;
+                    content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
                     background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
                     transition: left 0.5s;
                 }
-
-                .feature-card:hover::before {
-                    left: 100%;
-                }
+                .feature-card:hover::before { left: 100%; }
             `}</style>
     </main>
   );
