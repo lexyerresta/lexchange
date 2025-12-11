@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 import { AuthProvider } from "@/context/AuthContext";
 import { ToastProvider } from "@/context/ToastContext";
-
+import AppShell from "@/components/AppShell";
 
 export default function RootLayout({
   children,
@@ -24,7 +24,9 @@ export default function RootLayout({
       <body className={outfit.className}>
         <AuthProvider>
           <ToastProvider>
-            {children}
+            <AppShell>
+              {children}
+            </AppShell>
           </ToastProvider>
         </AuthProvider>
       </body>

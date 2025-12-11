@@ -30,15 +30,34 @@ export default function Navbar() {
         router.push('/');
     };
 
-    // Hide navbar if user is not logged in
-    if (!user) {
-        return null;
-    }
+    // Track scroll direction for auto-hide
+    const [lastScrollY, setLastScrollY] = useState(0);
+    const [showNavbar, setShowNavbar] = useState(true);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            const currentScrollY = window.scrollY;
+
+            // Show navbar when scrolling up or at top
+            if (currentScrollY < lastScrollY || currentScrollY < 100) {
+                setShowNavbar(true);
+            } else {
+                // Hide navbar when scrolling down
+                setShowNavbar(false);
+            }
+
+            setLastScrollY(currentScrollY);
+            setIsScrolled(currentScrollY > 50);
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [lastScrollY]);
 
     return (
         <motion.nav
             initial={{ y: 0 }}
-            animate={{ y: isScrolled ? 0 : -100 }}
+            animate={{ y: showNavbar ? 0 : -100 }}
             transition={{ duration: 0.3 }}
             className={`${styles.navbar} ${isScrolled ? styles.scrolled : ''}`}
             style={{
@@ -46,11 +65,12 @@ export default function Navbar() {
                 top: 0,
                 left: 0,
                 right: 0,
-                zIndex: 1000,
-                background: isScrolled ? 'rgba(10, 10, 20, 0.8)' : 'transparent',
-                backdropFilter: isScrolled ? 'blur(20px)' : 'none',
+                zIndex: 9999,
+                background: isScrolled ? 'rgba(10, 10, 20, 0.7)' : 'rgba(10, 10, 20, 0.3)',
+                backdropFilter: 'blur(20px)',
                 borderBottom: isScrolled ? '1px solid rgba(255,255,255,0.1)' : 'none',
-                transition: 'all 0.3s ease'
+                transition: 'all 0.3s ease',
+                boxShadow: isScrolled ? '0 4px 30px rgba(0,0,0,0.3)' : 'none'
             }}
         >
             <div className={styles.container}>
@@ -60,69 +80,76 @@ export default function Navbar() {
                     <span className={styles.logoText}>Lexchange</span>
                 </Link>
 
-                {/* Desktop Menu */}
-                <div className={styles.desktopMenu}>
-                    <Link href="/" className={styles.navLink}>Markets</Link>
-                    <Link href="/portfolio" className={styles.navLink}>Portfolio</Link>
-                    <Link href="/ai-trader" className={styles.navLink}>AI Trader</Link>
-                    <Link href="/trading-bots" className={styles.navLink}>Bots</Link>
-                </div>
+                {/* Desktop Menu - Conditional based on Auth */}
+                {!user ? (
+                    // GUEST NAVBAR: Clean & Minimal
+                    <div className={styles.desktopMenu}>
+                        <Link href="/" className={styles.navLink}>Home</Link>
+                        <Link href="#features" className={styles.navLink}>Features</Link>
+                        <Link href="#showcase" className={styles.navLink}>Showcase</Link>
+                    </div>
+                ) : (
+                    // USER NAVBAR: Navigation moved to Sidebar, keep Navbar clean or show status
+                    <div className={styles.desktopMenu} style={{ opacity: 0.7 }}>
+                        <span className={styles.navLink} style={{ cursor: 'default', color: '#a78bfa' }}>
+                            ● System Online
+                        </span>
+                    </div>
+                )}
 
                 {/* Auth Buttons */}
                 <div className={styles.authButtons}>
                     {user ? (
                         <div style={{ position: 'relative' }}>
-                            <button
-                                className={styles.userBtn}
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
                                 onClick={() => setShowUserMenu(!showUserMenu)}
+                                className={styles.userButton}
                             >
-                                <User size={18} />
-                                <span>{user.username}</span>
-                                <div style={{
-                                    fontSize: '0.75rem',
-                                    color: '#4ade80',
-                                    background: 'rgba(74, 222, 128, 0.1)',
-                                    padding: '0.2rem 0.5rem',
-                                    borderRadius: '0.3rem',
-                                    marginLeft: '0.5rem'
-                                }}>
-                                    ${user.balance.toFixed(2)}
+                                <div className={styles.userAvatar}>
+                                    {user.username ? user.username[0].toUpperCase() : 'U'}
                                 </div>
-                            </button>
+                                <span className={styles.userName}>{user.username}</span>
+                            </motion.button>
 
-                            {showUserMenu && (
-                                <div className={styles.userMenu}>
-                                    <Link href="/portfolio" onClick={() => setShowUserMenu(false)}>
-                                        <div className={styles.menuItem}>
-                                            <TrendingUp size={16} /> Portfolio
+                            <AnimatePresence>
+                                {showUserMenu && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                        className={styles.dropdownMenu}
+                                    >
+                                        <div className={styles.dropdownHeader}>
+                                            <div className={styles.dropdownName}>{user.username}</div>
+                                            <div className={styles.dropdownEmail}>Member</div>
                                         </div>
-                                    </Link>
-                                    <Link href="/transactions" onClick={() => setShowUserMenu(false)}>
-                                        <div className={styles.menuItem}>
-                                            <Wallet size={16} /> Transactions
-                                        </div>
-                                    </Link>
-                                    <div className={styles.menuDivider} />
-                                    <div className={styles.menuItem} onClick={handleLogout} style={{ color: '#f87171', cursor: 'pointer' }}>
-                                        <LogOut size={16} /> Logout
-                                    </div>
-                                </div>
-                            )}
+                                        <div className={styles.dropdownDivider} />
+                                        <Link href="/profile" className={styles.dropdownItem}>
+                                            Profile Settings
+                                        </Link>
+                                        <button onClick={handleLogout} className={styles.dropdownItem} style={{ color: '#ef4444' }}>
+                                            Sign Out
+                                        </button>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
                     ) : (
-                        <>
+                        <div className={styles.guestButtons}>
                             <Link href="/login">
                                 <button className={styles.loginBtn}>
                                     Log In
                                 </button>
                             </Link>
-                            <Link href="/login">
+                            <Link href="/login?mode=register">
                                 <button className={styles.signupBtn}>
                                     <Wallet size={18} />
-                                    Sign Up
+                                    Get Started
                                 </button>
                             </Link>
-                        </>
+                        </div>
                     )}
                 </div>
 
@@ -145,30 +172,32 @@ export default function Navbar() {
                         className={`${styles.mobileMenu} glass`}
                     >
                         <div className={styles.mobileMenuInner}>
-                            <Link href="/" className={styles.navLink} onClick={() => setIsOpen(false)}>Markets</Link>
-                            <Link href="/portfolio" className={styles.navLink} onClick={() => setIsOpen(false)}>Portfolio</Link>
-                            <Link href="/ai-trader" className={styles.navLink} onClick={() => setIsOpen(false)}>AI Trader</Link>
-                            <Link href="/trading-bots" className={styles.navLink} onClick={() => setIsOpen(false)}>Bots</Link>
-                            <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '0.5rem 0' }}></div>
-                            {user ? (
+                            {!user ? (
                                 <>
-                                    <div style={{ padding: '0.5rem', color: '#94a3b8', fontSize: '0.9rem' }}>
-                                        {user.username} • ${user.balance.toFixed(2)}
-                                    </div>
-                                    <button className={styles.loginBtn} onClick={handleLogout} style={{ textAlign: 'left', color: '#f87171' }}>
-                                        <LogOut size={16} /> Logout
-                                    </button>
-                                </>
-                            ) : (
-                                <>
+                                    <Link href="/" className={styles.navLink} onClick={() => setIsOpen(false)}>Home</Link>
+                                    <Link href="#features" className={styles.navLink} onClick={() => setIsOpen(false)}>Features</Link>
+                                    <div className={styles.menuDivider} />
                                     <Link href="/login" onClick={() => setIsOpen(false)}>
                                         <button className={styles.loginBtn} style={{ textAlign: 'left', width: '100%' }}>Log In</button>
                                     </Link>
-                                    <Link href="/login" onClick={() => setIsOpen(false)}>
+                                    <Link href="/login?mode=register" onClick={() => setIsOpen(false)}>
                                         <button className={styles.signupBtn} style={{ justifyContent: 'center', width: '100%' }}>
-                                            Sign Up
+                                            Get Started
                                         </button>
                                     </Link>
+                                </>
+                            ) : (
+                                <>
+                                    <div style={{ padding: '0.5rem', color: '#94a3b8', fontSize: '0.9rem' }}>
+                                        Logged in as {user.username}
+                                    </div>
+                                    <Link href="/portfolio" className={styles.navLink} onClick={() => setIsOpen(false)}>Portfolio</Link>
+                                    <Link href="/markets" className={styles.navLink} onClick={() => setIsOpen(false)}>Markets</Link>
+                                    <Link href="/ai-trader" className={styles.navLink} onClick={() => setIsOpen(false)}>AI Trader</Link>
+                                    <div className={styles.menuDivider} />
+                                    <button className={styles.loginBtn} onClick={handleLogout} style={{ textAlign: 'left', color: '#f87171' }}>
+                                        <LogOut size={16} /> Logout
+                                    </button>
                                 </>
                             )}
                         </div>
