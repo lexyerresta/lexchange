@@ -71,7 +71,7 @@ export default function SatoshiMysteryShowcase() {
 
         // 4. DIGITAL GHOST PARTICLES
         // Surround the figure with data particles
-        const particleCount = 2000;
+        const particleCount = 3000;
         const pGeo = new THREE.BufferGeometry();
         const pPos = new Float32Array(particleCount * 3);
         const pSizes = new Float32Array(particleCount);
@@ -85,17 +85,17 @@ export default function SatoshiMysteryShowcase() {
             pPos[i * 3 + 1] = r * Math.cos(phi) - 0.5;
             pPos[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta);
 
-            pSizes[i] = Math.random() * 0.05;
+            pSizes[i] = 0.02 + Math.random() * 0.04; // Slightly larger and varied particles
         }
 
         pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
         pGeo.setAttribute('size', new THREE.BufferAttribute(pSizes, 1));
 
         const pMat = new THREE.PointsMaterial({
-            color: 0x00ffff,
-            size: 0.03,
+            color: 0x22d3ee,
+            size: 0.04,
             transparent: true,
-            opacity: 0.4,
+            opacity: 0.6,
             blending: THREE.AdditiveBlending
         });
         const particleSystem = new THREE.Points(pGeo, pMat);
@@ -146,17 +146,22 @@ export default function SatoshiMysteryShowcase() {
         }
 
         // --- LIGHTING ---
-        const ambientLight = new THREE.AmbientLight(0x404040, 0.5); // Soft white light
+        const ambientLight = new THREE.AmbientLight(0x222244, 0.8); // Darker ambient with more depth
         scene.add(ambientLight);
 
-        const keyLight = new THREE.SpotLight(0x00ffff, 5);
-        keyLight.position.set(5, 5, 5);
+        const keyLight = new THREE.SpotLight(0x00ffff, 3);
+        keyLight.position.set(4, 6, 4);
         scene.add(keyLight);
 
-        const rimLight = new THREE.SpotLight(0xa78bfa, 8);
-        rimLight.position.set(-5, 2, -5);
+        const rimLight = new THREE.SpotLight(0xa78bfa, 6);
+        rimLight.position.set(-4, 3, -4);
         rimLight.lookAt(0, 0, 0);
         scene.add(rimLight);
+
+        // Add pulsing point light inside the void
+        const voidLight = new THREE.PointLight(0x6366f1, 0, 3);
+        voidLight.position.set(0, 0.2, 0);
+        figureGroup.add(voidLight);
 
         // --- ANIMATION LOOP ---
         const clock = new THREE.Clock();
@@ -164,18 +169,29 @@ export default function SatoshiMysteryShowcase() {
         const animate = () => {
             const time = clock.getElapsedTime();
 
-            // Float Figure
-            figureGroup.position.y = Math.sin(time * 0.5) * 0.2;
-            figureGroup.rotation.y = Math.sin(time * 0.2) * 0.1; // Gentle turn
+            // Float Figure with breathing effect
+            figureGroup.position.y = Math.sin(time * 0.5) * 0.15;
+            figureGroup.rotation.y = time * 0.05; // Slow continuous rotation
 
-            // Animate Particles (Matrix Rain-ish)
+            // Pulse the void light
+            voidLight.intensity = 0.5 + Math.sin(time * 2) * 0.5;
+
+            // Animate Particles - Slow spiral rotation with color pulse
             const positions = particleSystem.geometry.attributes.position.array as Float32Array;
             for (let i = 0; i < particleCount; i++) {
-                // positions[i*3+1] -= 0.01; // Fall down
-                // if(positions[i*3+1] < -4) positions[i*3+1] = 4; // Reset
+                // Subtle vertical drift
+                positions[i * 3 + 1] -= 0.003;
+                if (positions[i * 3 + 1] < -4) {
+                    positions[i * 3 + 1] = 4;
+                    // Randomize X and Z on reset
+                    const r = 2 + Math.random() * 2;
+                    const theta = Math.random() * Math.PI * 2;
+                    positions[i * 3] = r * Math.cos(theta);
+                    positions[i * 3 + 2] = r * Math.sin(theta);
+                }
             }
+            particleSystem.geometry.attributes.position.needsUpdate = true;
             particleSystem.rotation.y += 0.001;
-            // particleSystem.geometry.attributes.position.needsUpdate = true;
 
             // Animate Coins
             coins.forEach(coin => {
