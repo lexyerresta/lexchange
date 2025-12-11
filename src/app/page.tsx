@@ -13,6 +13,7 @@ import HolographicCard from "@/components/HolographicCard";
 import ParticleCursor from "@/components/ParticleCursor";
 import QuickSwapWidget from "@/components/QuickSwapWidget";
 import NeuroQuantumWidget from "@/components/NeuroQuantumWidget";
+import DysonSwarmWidget from "@/components/DysonSwarmWidget";
 import LoadingScreen from "@/components/LoadingScreen";
 import StatsGrid from "@/components/StatsGrid";
 import { Zap, Shield, TrendingUp, Users, Bot, Eye } from 'lucide-react';
@@ -165,6 +166,49 @@ export default function Home() {
             </p>
           </div>
           <NeuroQuantumWidget />
+        </section>
+
+        {/* 2100 Feature Section */}
+        <section style={{
+          padding: '4rem 2rem',
+          maxWidth: '1400px',
+          margin: '0 auto',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '2rem',
+          transform: `translateY(${Math.max(0, (scrollY - 400) * -0.05)}px)`,
+          opacity: Math.min(1, Math.max(0, (scrollY - 250) / 200))
+        }}>
+          <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
+            <div style={{
+              display: 'inline-block',
+              padding: '5px 15px',
+              borderRadius: '20px',
+              background: 'rgba(251, 191, 36, 0.1)',
+              color: '#fbbf24',
+              fontSize: '0.8rem',
+              fontWeight: 'bold',
+              border: '1px solid rgba(251, 191, 36, 0.3)',
+              marginBottom: '1rem'
+            }}>
+              FEATURE FROM 2100
+            </div>
+            <h2 style={{
+              fontSize: '2.5rem',
+              fontWeight: '800',
+              color: 'white',
+              marginBottom: '1rem',
+              textShadow: '0 0 30px rgba(251, 191, 36, 0.2)'
+            }}>
+              Kardashev <span style={{ color: '#fbbf24' }}>Energy Exchange</span>
+            </h2>
+            <p style={{ color: '#9ca3af', maxWidth: '600px' }}>
+              Deploy Type-II Dyson Swarms to harvest direct stellar plasma.
+              Stake stars to earn Universal Energy Credits (UEC).
+            </p>
+          </div>
+          <DysonSwarmWidget />
         </section>
 
         {/* 3D Showcase Section */}

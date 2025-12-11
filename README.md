@@ -86,7 +86,12 @@ Lexchange isn't just another crypto exchange. It's a **next-generation trading p
 - **Bio-Feedback Visuals** - Real-time canvas wave generation
 - **Thought Execution** - "Execute via Thought" interaction paradigm
 - **Quantum Telemetry** - Futuristic data metrics (Synaptic Latency, TB/s Bandwidth)
-- **Multi-Stage UX** - Idle -> Calibrating -> Synced -> Execution flow
+#### Kardashev Energy Exchange (2100 Feature)
+- **Stellar Staking** - Select stars (Sol, Sirius, Betelgeuse) to harvest
+- **Dyson Swarm Visuals** - 3D orbital rings and drone deployment
+- **Plasma Yield Metrics** - Track Zettawatts (ZW) of energy collected
+- **Type-II Civilization UI** - Industrial sci-fi aesthetic with stability warnings
+- **Interactive Harvesting** - Deploy/Retract mechanics with visual feedback
 
 ### 🎨 3D Showcase - "Network Globe" (Retro-Futuristic)
 
