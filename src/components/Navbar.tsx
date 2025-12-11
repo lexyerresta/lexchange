@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import styles from './Navbar.module.css';
 import { Menu, X, Wallet, User, LogOut, TrendingUp, Star, BarChart2, Zap, Home, Bot, Bell, Shield, Smartphone } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -376,7 +377,7 @@ export default function Navbar() {
                             </div>
                         </>
                     ) : (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }} className={styles.guestButtons}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }} className={styles.authButtons}>
                             <Link href="/login" style={{ textDecoration: 'none' }}>
                                 <motion.button
                                     whileHover={{ scale: 1.05, background: 'rgba(255,255,255,0.1)' }}
