@@ -12,6 +12,7 @@ import LivePriceTicker from "@/components/LivePriceTicker";
 import HolographicCard from "@/components/HolographicCard";
 import ParticleCursor from "@/components/ParticleCursor";
 import QuickSwapWidget from "@/components/QuickSwapWidget";
+import NeuroQuantumWidget from "@/components/NeuroQuantumWidget";
 import LoadingScreen from "@/components/LoadingScreen";
 import StatsGrid from "@/components/StatsGrid";
 import { Zap, Shield, TrendingUp, Users, Bot, Eye } from 'lucide-react';
@@ -121,6 +122,49 @@ export default function Home() {
             <p style={{ color: '#9ca3af' }}>Zero fees, infinite liquidity, lightning fast.</p>
           </div>
           <QuickSwapWidget />
+        </section>
+
+        {/* 2050 Feature Section */}
+        <section style={{
+          padding: '4rem 2rem',
+          maxWidth: '1400px',
+          margin: '0 auto',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '2rem',
+          transform: `translateY(${Math.max(0, (scrollY - 300) * -0.05)}px)`,
+          opacity: Math.min(1, Math.max(0, (scrollY - 150) / 200))
+        }}>
+          <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
+            <div style={{
+              display: 'inline-block',
+              padding: '5px 15px',
+              borderRadius: '20px',
+              background: 'rgba(34, 211, 238, 0.1)',
+              color: '#22d3ee',
+              fontSize: '0.8rem',
+              fontWeight: 'bold',
+              border: '1px solid rgba(34, 211, 238, 0.3)',
+              marginBottom: '1rem'
+            }}>
+              FEATURE FROM 2050
+            </div>
+            <h2 style={{
+              fontSize: '2.5rem',
+              fontWeight: '800',
+              color: 'white',
+              marginBottom: '1rem',
+              textShadow: '0 0 30px rgba(34, 211, 238, 0.2)'
+            }}>
+              Neuro-Quantum <span style={{ color: '#22d3ee' }}>Interface</span>
+            </h2>
+            <p style={{ color: '#9ca3af', maxWidth: '600px' }}>
+              Direct Brain-Computer Interface (BCI) allowing thought-speed execution.
+              Zero-latency trading powered by quantum entanglement.
+            </p>
+          </div>
+          <NeuroQuantumWidget />
         </section>
 
         {/* 3D Showcase Section */}
