@@ -8,8 +8,12 @@ export default function SatoshiMysteryShowcase() {
     const mountRef = useRef<HTMLDivElement>(null);
     const [hoveredBlock, setHoveredBlock] = useState<any>(null);
 
+    const currentHoverIdRef = useRef<string | null>(null);
+
     useEffect(() => {
         if (!mountRef.current) return;
+
+        let animationFrameId: number;
 
         // --- SETUP ---
         const scene = new THREE.Scene();
@@ -212,12 +216,13 @@ export default function SatoshiMysteryShowcase() {
             raycaster.setFromCamera(mouse, camera);
             const intersects = raycaster.intersectObjects(blocks);
 
-            // Reset previous hover
+            // Reset previous hover visual
             blocks.forEach(b => {
-                // Smoothly return to normal
                 const mat = b.material as THREE.MeshPhysicalMaterial;
-                mat.emissive.lerp(new THREE.Color(0x00ffff), 0.1);
-                b.scale.lerp(new THREE.Vector3(1, 1, 1), 0.1);
+                if (mat.emissive.getHex() !== 0x00ffff) {
+                    mat.emissive.lerp(new THREE.Color(0x00ffff), 0.1);
+                    b.scale.lerp(new THREE.Vector3(1, 1, 1), 0.1);
+                }
             });
 
             if (intersects.length > 0) {
@@ -232,24 +237,29 @@ export default function SatoshiMysteryShowcase() {
                 target.rotation.x += 0.2;
                 target.rotation.y += 0.2;
 
-                setHoveredBlock({
-                    id: target.userData.id,
-                    txs: target.userData.txCount,
-                    x: mouse.x,
-                    y: mouse.y
-                });
-
-                document.body.style.cursor = 'pointer';
+                // Update State ONLY if ID changed
+                const newId = target.userData.id;
+                if (currentHoverIdRef.current !== newId) {
+                    currentHoverIdRef.current = newId;
+                    setHoveredBlock({
+                        id: newId,
+                        txs: target.userData.txCount,
+                    });
+                    document.body.style.cursor = 'pointer';
+                }
             } else {
-                setHoveredBlock(null);
-                document.body.style.cursor = 'default';
+                if (currentHoverIdRef.current !== null) {
+                    currentHoverIdRef.current = null;
+                    setHoveredBlock(null);
+                    document.body.style.cursor = 'default';
+                }
             }
 
             renderer.render(scene, camera);
-            requestAnimationFrame(animate);
+            animationFrameId = requestAnimationFrame(animate);
         };
 
-        animate();
+        animate(); // Start the animation loop
 
         // Cleanup
         const handleResize = () => {
@@ -260,6 +270,7 @@ export default function SatoshiMysteryShowcase() {
         window.addEventListener('resize', handleResize);
 
         return () => {
+            cancelAnimationFrame(animationFrameId); // Cancel the animation frame
             window.removeEventListener('mousemove', onMouseMove);
             window.removeEventListener('mousedown', onMouseDown);
             window.removeEventListener('mouseup', onMouseUp);
