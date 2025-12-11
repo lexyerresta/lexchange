@@ -1,12 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { Menu, X, Wallet, User, LogOut, TrendingUp, Star, BarChart2, Zap, Home, Bot, Bell } from 'lucide-react';
+import { Menu, X, Wallet, User, LogOut, TrendingUp, Star, BarChart2, Zap, Home, Bot, Bell, Shield, Smartphone } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter, usePathname } from 'next/navigation';
-import styles from './Navbar.module.css';
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
@@ -54,51 +53,56 @@ export default function Navbar() {
                 right: 0,
                 zIndex: 9999,
                 background: isScrolled
-                    ? 'rgba(8, 8, 16, 0.95)'
-                    : 'linear-gradient(180deg, rgba(8, 8, 16, 0.9) 0%, rgba(8, 8, 16, 0) 100%)',
+                    ? 'rgba(5, 5, 10, 0.95)'
+                    : 'linear-gradient(180deg, rgba(5, 5, 10, 0.95) 0%, rgba(5, 5, 10, 0) 100%)',
                 backdropFilter: isScrolled ? 'blur(20px)' : 'none',
-                borderBottom: isScrolled ? '1px solid rgba(167, 139, 250, 0.15)' : 'none',
+                borderBottom: isScrolled ? '1px solid rgba(167, 139, 250, 0.2)' : 'none',
                 transition: 'all 0.3s ease',
+                boxShadow: isScrolled ? '0 4px 30px rgba(0, 0, 0, 0.5)' : 'none'
             }}
         >
             <div style={{
-                maxWidth: '1400px',
+                maxWidth: '1440px',
                 margin: '0 auto',
                 padding: '0 1.5rem',
-                height: '64px',
+                height: '70px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 gap: '2rem'
             }}>
                 {/* Logo */}
-                <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                     <motion.div
-                        whileHover={{ rotate: 360 }}
-                        transition={{ duration: 0.5 }}
+                        whileHover={{ rotate: 360, scale: 1.1 }}
+                        transition={{ duration: 0.6, type: 'spring' }}
                         style={{
-                            width: '36px',
-                            height: '36px',
-                            borderRadius: '10px',
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '12px',
                             background: 'linear-gradient(135deg, #a78bfa, #6366f1)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            fontSize: '1.25rem',
+                            fontSize: '1.4rem',
                             fontWeight: '800',
                             color: 'white',
-                            boxShadow: '0 4px 20px rgba(167, 139, 250, 0.4)'
+                            boxShadow: '0 0 20px rgba(167, 139, 250, 0.6)',
+                            border: '1px solid rgba(255, 255, 255, 0.2)'
                         }}
                     >
                         L
                     </motion.div>
                     <span style={{
-                        fontSize: '1.25rem',
-                        fontWeight: '700',
-                        background: 'linear-gradient(135deg, #fff, #a78bfa)',
+                        fontSize: '1.4rem',
+                        fontWeight: '800',
+                        background: 'linear-gradient(135deg, #fff 0%, #a78bfa 50%, #22d3ee 100%)',
                         WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent'
-                    }}>
+                        WebkitTextFillColor: 'transparent',
+                        textShadow: '0 0 30px rgba(167, 139, 250, 0.3)',
+                        display: 'none', // Hide on small screens if needed, usually show
+                        '@media (min-width: 768px)': { display: 'block' }
+                    } as any}>
                         Lexchange
                     </span>
                 </Link>
@@ -107,48 +111,58 @@ export default function Navbar() {
                 <div style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '0.25rem',
+                    gap: '0.4rem',
                     flex: 1,
-                    justifyContent: 'center'
-                }} className={styles.desktopMenu}>
+                    justifyContent: 'center',
+                    overflowX: 'auto',
+                    scrollbarWidth: 'none'
+                }}>
                     {user ? (
-                        // LOGGED IN: Show full navigation
+                        // LOGGED IN: Show full navigation with glow effects
                         navItems.map((item) => (
                             <Link key={item.href} href={item.href} style={{ textDecoration: 'none' }}>
                                 <motion.div
-                                    whileHover={{ y: -2 }}
+                                    whileHover={{ y: -2, boxShadow: '0 4px 20px rgba(167, 139, 250, 0.4)' }}
                                     whileTap={{ scale: 0.95 }}
                                     style={{
                                         display: 'flex',
                                         alignItems: 'center',
-                                        gap: '0.4rem',
-                                        padding: '0.5rem 0.85rem',
-                                        borderRadius: '8px',
+                                        gap: '0.5rem',
+                                        padding: '0.6rem 1rem',
+                                        borderRadius: '10px',
                                         fontSize: '0.85rem',
-                                        fontWeight: '500',
+                                        fontWeight: '600',
                                         color: isActive(item.href)
                                             ? '#fff'
                                             : item.highlight
-                                                ? '#a78bfa'
+                                                ? '#e0e7ff'
                                                 : '#94a3b8',
                                         background: isActive(item.href)
-                                            ? 'linear-gradient(135deg, rgba(167, 139, 250, 0.3), rgba(99, 102, 241, 0.2))'
-                                            : 'transparent',
+                                            ? 'linear-gradient(135deg, rgba(167, 139, 250, 0.4), rgba(99, 102, 241, 0.3))'
+                                            : item.highlight
+                                                ? 'rgba(167, 139, 250, 0.1)'
+                                                : 'transparent',
                                         border: isActive(item.href)
-                                            ? '1px solid rgba(167, 139, 250, 0.4)'
-                                            : '1px solid transparent',
+                                            ? '1px solid rgba(167, 139, 250, 0.5)'
+                                            : item.highlight
+                                                ? '1px solid rgba(167, 139, 250, 0.2)'
+                                                : '1px solid transparent',
                                         transition: 'all 0.2s ease',
                                         cursor: 'pointer',
-                                        position: 'relative'
+                                        position: 'relative',
+                                        whiteSpace: 'nowrap',
+                                        boxShadow: isActive(item.href) ? '0 0 15px rgba(167, 139, 250, 0.3)' : 'none'
                                     }}
                                 >
-                                    {item.icon}
+                                    <span style={{ color: isActive(item.href) ? '#fff' : item.highlight ? '#a78bfa' : '#64748b' }}>
+                                        {item.icon}
+                                    </span>
                                     <span>{item.label}</span>
-                                    {item.highlight && !isActive(item.href) && (
+                                    {item.highlight && (
                                         <span style={{
                                             position: 'absolute',
-                                            top: '-4px',
-                                            right: '-4px',
+                                            top: '4px',
+                                            right: '4px',
                                             width: '6px',
                                             height: '6px',
                                             borderRadius: '50%',
@@ -160,28 +174,28 @@ export default function Navbar() {
                             </Link>
                         ))
                     ) : (
-                        // GUEST: Simple navigation
+                        // GUEST: Simple navigation with hover glow
                         <>
                             <Link href="/" style={{ textDecoration: 'none' }}>
                                 <motion.span
-                                    whileHover={{ color: '#fff' }}
-                                    style={{ color: '#94a3b8', padding: '0.5rem 1rem', fontSize: '0.9rem', fontWeight: '500' }}
+                                    whileHover={{ color: '#fff', textShadow: '0 0 10px rgba(255,255,255,0.5)' }}
+                                    style={{ color: '#cbd5e1', padding: '0.5rem 1rem', fontSize: '0.95rem', fontWeight: '500', transition: 'color 0.2s' }}
                                 >
                                     Home
                                 </motion.span>
                             </Link>
                             <Link href="#features" style={{ textDecoration: 'none' }}>
                                 <motion.span
-                                    whileHover={{ color: '#fff' }}
-                                    style={{ color: '#94a3b8', padding: '0.5rem 1rem', fontSize: '0.9rem', fontWeight: '500' }}
+                                    whileHover={{ color: '#fff', textShadow: '0 0 10px rgba(255,255,255,0.5)' }}
+                                    style={{ color: '#cbd5e1', padding: '0.5rem 1rem', fontSize: '0.95rem', fontWeight: '500', transition: 'color 0.2s' }}
                                 >
                                     Features
                                 </motion.span>
                             </Link>
                             <Link href="#showcase" style={{ textDecoration: 'none' }}>
                                 <motion.span
-                                    whileHover={{ color: '#fff' }}
-                                    style={{ color: '#94a3b8', padding: '0.5rem 1rem', fontSize: '0.9rem', fontWeight: '500' }}
+                                    whileHover={{ color: '#fff', textShadow: '0 0 10px rgba(255,255,255,0.5)' }}
+                                    style={{ color: '#cbd5e1', padding: '0.5rem 1rem', fontSize: '0.95rem', fontWeight: '500', transition: 'color 0.2s' }}
                                 >
                                     Showcase
                                 </motion.span>
@@ -196,14 +210,14 @@ export default function Navbar() {
                         <>
                             {/* Notification Bell */}
                             <motion.button
-                                whileHover={{ scale: 1.1 }}
+                                whileHover={{ scale: 1.1, background: 'rgba(255, 255, 255, 0.1)' }}
                                 whileTap={{ scale: 0.9 }}
                                 style={{
                                     background: 'rgba(255, 255, 255, 0.05)',
                                     border: '1px solid rgba(255, 255, 255, 0.1)',
-                                    borderRadius: '10px',
-                                    padding: '0.5rem',
-                                    color: '#94a3b8',
+                                    borderRadius: '12px',
+                                    padding: '0.6rem',
+                                    color: '#e2e8f0',
                                     cursor: 'pointer',
                                     display: 'flex',
                                     alignItems: 'center',
@@ -214,47 +228,50 @@ export default function Navbar() {
                                 <Bell size={18} />
                                 <span style={{
                                     position: 'absolute',
-                                    top: '4px',
-                                    right: '4px',
+                                    top: '6px',
+                                    right: '6px',
                                     width: '6px',
                                     height: '6px',
                                     borderRadius: '50%',
-                                    background: '#ef4444'
+                                    background: '#ef4444',
+                                    boxShadow: '0 0 8px #ef4444'
                                 }} />
                             </motion.button>
 
                             {/* User Menu */}
                             <div style={{ position: 'relative' }}>
                                 <motion.button
-                                    whileHover={{ scale: 1.02 }}
+                                    whileHover={{ scale: 1.02, boxShadow: '0 0 20px rgba(99, 102, 241, 0.3)' }}
                                     whileTap={{ scale: 0.98 }}
                                     onClick={() => setShowUserMenu(!showUserMenu)}
                                     style={{
                                         display: 'flex',
                                         alignItems: 'center',
-                                        gap: '0.5rem',
-                                        background: 'linear-gradient(135deg, rgba(167, 139, 250, 0.15), rgba(99, 102, 241, 0.1))',
+                                        gap: '0.75rem',
+                                        background: 'linear-gradient(135deg, rgba(167, 139, 250, 0.1), rgba(99, 102, 241, 0.1))',
                                         border: '1px solid rgba(167, 139, 250, 0.3)',
-                                        borderRadius: '12px',
-                                        padding: '0.4rem 0.75rem 0.4rem 0.5rem',
+                                        borderRadius: '14px',
+                                        padding: '0.4rem 0.8rem 0.4rem 0.5rem',
                                         cursor: 'pointer',
-                                        color: '#fff'
+                                        color: '#fff',
+                                        transition: 'all 0.2s'
                                     }}
                                 >
                                     <div style={{
-                                        width: '28px',
-                                        height: '28px',
-                                        borderRadius: '8px',
+                                        width: '32px',
+                                        height: '32px',
+                                        borderRadius: '10px',
                                         background: 'linear-gradient(135deg, #a78bfa, #6366f1)',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        fontSize: '0.8rem',
-                                        fontWeight: '700'
+                                        fontSize: '0.9rem',
+                                        fontWeight: '700',
+                                        boxShadow: '0 2px 10px rgba(99, 102, 241, 0.3)'
                                     }}>
                                         {user.username?.[0]?.toUpperCase() || 'U'}
                                     </div>
-                                    <span style={{ fontSize: '0.85rem', fontWeight: '500' }}>
+                                    <span style={{ fontSize: '0.9rem', fontWeight: '600', maxWidth: '100px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                         {user.username}
                                     </span>
                                 </motion.button>
@@ -267,15 +284,15 @@ export default function Navbar() {
                                             exit={{ opacity: 0, y: 10, scale: 0.95 }}
                                             style={{
                                                 position: 'absolute',
-                                                top: 'calc(100% + 8px)',
+                                                top: 'calc(100% + 12px)',
                                                 right: 0,
-                                                width: '220px',
-                                                background: 'rgba(15, 15, 30, 0.98)',
-                                                backdropFilter: 'blur(20px)',
+                                                width: '240px',
+                                                background: 'rgba(10, 10, 20, 0.95)',
+                                                backdropFilter: 'blur(30px)',
                                                 border: '1px solid rgba(167, 139, 250, 0.2)',
-                                                borderRadius: '12px',
-                                                padding: '0.5rem',
-                                                boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5)'
+                                                borderRadius: '16px',
+                                                padding: '0.75rem',
+                                                boxShadow: '0 20px 50px rgba(0, 0, 0, 0.6)'
                                             }}
                                         >
                                             <div style={{
@@ -283,63 +300,75 @@ export default function Navbar() {
                                                 borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
                                                 marginBottom: '0.5rem'
                                             }}>
-                                                <div style={{ color: '#fff', fontWeight: '600', fontSize: '0.9rem' }}>
+                                                <div style={{ color: '#fff', fontWeight: '700', fontSize: '1rem', marginBottom: '0.2rem' }}>
                                                     {user.username}
                                                 </div>
-                                                <div style={{ color: '#64748b', fontSize: '0.75rem' }}>
-                                                    Balance: ${user.balance?.toLocaleString()}
+                                                <div style={{ color: '#22d3ee', fontSize: '0.8rem', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                                                    <Shield size={12} />
+                                                    Verified Trader
                                                 </div>
                                             </div>
-                                            <Link href="/portfolio" style={{ textDecoration: 'none' }} onClick={() => setShowUserMenu(false)}>
-                                                <motion.div
-                                                    whileHover={{ x: 4, background: 'rgba(167, 139, 250, 0.1)' }}
-                                                    style={{
-                                                        padding: '0.6rem 0.75rem',
-                                                        borderRadius: '8px',
-                                                        color: '#e2e8f0',
-                                                        fontSize: '0.85rem',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        gap: '0.5rem',
-                                                        cursor: 'pointer'
-                                                    }}
-                                                >
-                                                    <User size={16} /> Profile
-                                                </motion.div>
-                                            </Link>
-                                            <Link href="/transactions" style={{ textDecoration: 'none' }} onClick={() => setShowUserMenu(false)}>
-                                                <motion.div
-                                                    whileHover={{ x: 4, background: 'rgba(167, 139, 250, 0.1)' }}
-                                                    style={{
-                                                        padding: '0.6rem 0.75rem',
-                                                        borderRadius: '8px',
-                                                        color: '#e2e8f0',
-                                                        fontSize: '0.85rem',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        gap: '0.5rem',
-                                                        cursor: 'pointer'
-                                                    }}
-                                                >
-                                                    📜 Transactions
-                                                </motion.div>
-                                            </Link>
-                                            <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '0.5rem 0' }} />
+
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                                                <Link href="/portfolio" style={{ textDecoration: 'none' }} onClick={() => setShowUserMenu(false)}>
+                                                    <motion.div
+                                                        whileHover={{ x: 4, background: 'rgba(167, 139, 250, 0.15)', color: '#fff' }}
+                                                        style={{
+                                                            padding: '0.75rem',
+                                                            borderRadius: '10px',
+                                                            color: '#cbd5e1',
+                                                            fontSize: '0.9rem',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: '0.75rem',
+                                                            cursor: 'pointer',
+                                                            fontWeight: '500',
+                                                            transition: 'all 0.2s'
+                                                        }}
+                                                    >
+                                                        <User size={18} /> Profile & Settings
+                                                    </motion.div>
+                                                </Link>
+                                                <Link href="/transactions" style={{ textDecoration: 'none' }} onClick={() => setShowUserMenu(false)}>
+                                                    <motion.div
+                                                        whileHover={{ x: 4, background: 'rgba(167, 139, 250, 0.15)', color: '#fff' }}
+                                                        style={{
+                                                            padding: '0.75rem',
+                                                            borderRadius: '10px',
+                                                            color: '#cbd5e1',
+                                                            fontSize: '0.9rem',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: '0.75rem',
+                                                            cursor: 'pointer',
+                                                            fontWeight: '500',
+                                                            transition: 'all 0.2s'
+                                                        }}
+                                                    >
+                                                        <Wallet size={18} /> Wallet & Txns
+                                                    </motion.div>
+                                                </Link>
+                                            </div>
+
+                                            <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '0.75rem 0' }} />
+
                                             <motion.div
-                                                whileHover={{ x: 4, background: 'rgba(239, 68, 68, 0.1)' }}
+                                                whileHover={{ x: 4, background: 'rgba(239, 68, 68, 0.15)', color: '#fca5a5' }}
                                                 onClick={handleLogout}
                                                 style={{
-                                                    padding: '0.6rem 0.75rem',
-                                                    borderRadius: '8px',
+                                                    padding: '0.75rem',
+                                                    borderRadius: '10px',
                                                     color: '#f87171',
-                                                    fontSize: '0.85rem',
+                                                    fontSize: '0.9rem',
                                                     display: 'flex',
                                                     alignItems: 'center',
-                                                    gap: '0.5rem',
-                                                    cursor: 'pointer'
+                                                    gap: '0.75rem',
+                                                    cursor: 'pointer',
+                                                    fontWeight: '600',
+                                                    transition: 'all 0.2s'
                                                 }}
                                             >
-                                                <LogOut size={16} /> Sign Out
+                                                <LogOut size={18} /> Sign Out
                                             </motion.div>
                                         </motion.div>
                                     )}
@@ -347,20 +376,21 @@ export default function Navbar() {
                             </div>
                         </>
                     ) : (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }} className={styles.guestButtons}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }} className={styles.guestButtons}>
                             <Link href="/login" style={{ textDecoration: 'none' }}>
                                 <motion.button
-                                    whileHover={{ scale: 1.05 }}
+                                    whileHover={{ scale: 1.05, background: 'rgba(255,255,255,0.1)' }}
                                     whileTap={{ scale: 0.95 }}
                                     style={{
                                         background: 'transparent',
                                         border: '1px solid rgba(255, 255, 255, 0.2)',
-                                        borderRadius: '10px',
-                                        padding: '0.5rem 1rem',
+                                        borderRadius: '12px',
+                                        padding: '0.6rem 1.2rem',
                                         color: '#fff',
-                                        fontSize: '0.85rem',
-                                        fontWeight: '500',
-                                        cursor: 'pointer'
+                                        fontSize: '0.9rem',
+                                        fontWeight: '600',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s'
                                     }}
                                 >
                                     Log In
@@ -368,24 +398,29 @@ export default function Navbar() {
                             </Link>
                             <Link href="/login?mode=register" style={{ textDecoration: 'none' }}>
                                 <motion.button
-                                    whileHover={{ scale: 1.05, boxShadow: '0 8px 30px rgba(167, 139, 250, 0.4)' }}
+                                    whileHover={{
+                                        scale: 1.05,
+                                        boxShadow: '0 0 30px rgba(167, 139, 250, 0.5)',
+                                        background: 'linear-gradient(135deg, #8b5cf6, #3b82f6)'
+                                    }}
                                     whileTap={{ scale: 0.95 }}
                                     style={{
                                         background: 'linear-gradient(135deg, #a78bfa, #6366f1)',
                                         border: 'none',
-                                        borderRadius: '10px',
-                                        padding: '0.5rem 1rem',
+                                        borderRadius: '12px',
+                                        padding: '0.6rem 1.2rem',
                                         color: '#fff',
-                                        fontSize: '0.85rem',
-                                        fontWeight: '600',
+                                        fontSize: '0.9rem',
+                                        fontWeight: '700',
                                         cursor: 'pointer',
                                         display: 'flex',
                                         alignItems: 'center',
-                                        gap: '0.4rem',
-                                        boxShadow: '0 4px 20px rgba(167, 139, 250, 0.3)'
+                                        gap: '0.5rem',
+                                        boxShadow: '0 4px 20px rgba(167, 139, 250, 0.3)',
+                                        transition: 'all 0.2s'
                                     }}
                                 >
-                                    <Wallet size={16} />
+                                    <Zap size={16} fill="white" />
                                     Get Started
                                 </motion.button>
                             </Link>
@@ -394,21 +429,21 @@ export default function Navbar() {
 
                     {/* Mobile Toggle */}
                     <motion.button
-                        whileHover={{ scale: 1.1 }}
+                        whileHover={{ scale: 1.1, background: 'rgba(255,255,255,0.1)' }}
                         whileTap={{ scale: 0.9 }}
                         onClick={() => setIsOpen(!isOpen)}
                         style={{
                             display: 'none',
                             background: 'rgba(255, 255, 255, 0.05)',
                             border: '1px solid rgba(255, 255, 255, 0.1)',
-                            borderRadius: '10px',
-                            padding: '0.5rem',
+                            borderRadius: '12px',
+                            padding: '0.6rem',
                             color: '#fff',
                             cursor: 'pointer'
                         }}
                         className={styles.mobileToggle}
                     >
-                        {isOpen ? <X size={22} /> : <Menu size={22} />}
+                        {isOpen ? <X size={24} /> : <Menu size={24} />}
                     </motion.button>
                 </div>
             </div>
@@ -421,12 +456,13 @@ export default function Navbar() {
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
                         style={{
-                            background: 'rgba(8, 8, 16, 0.98)',
+                            background: 'rgba(5, 5, 10, 0.98)',
                             borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-                            overflow: 'hidden'
+                            overflow: 'hidden',
+                            backdropFilter: 'blur(20px)'
                         }}
                     >
-                        <div style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                             {user ? (
                                 <>
                                     {navItems.map((item) => (
@@ -434,58 +470,63 @@ export default function Navbar() {
                                             <div style={{
                                                 display: 'flex',
                                                 alignItems: 'center',
-                                                gap: '0.75rem',
-                                                padding: '0.75rem',
-                                                borderRadius: '10px',
+                                                gap: '1rem',
+                                                padding: '1rem',
+                                                borderRadius: '14px',
                                                 color: isActive(item.href) ? '#fff' : '#94a3b8',
-                                                background: isActive(item.href) ? 'rgba(167, 139, 250, 0.2)' : 'transparent'
+                                                background: isActive(item.href)
+                                                    ? 'linear-gradient(90deg, rgba(167, 139, 250, 0.2), transparent)'
+                                                    : 'rgba(255,255,255,0.03)',
+                                                border: isActive(item.href) ? '1px solid rgba(167, 139, 250, 0.2)' : '1px solid transparent'
                                             }}>
                                                 {item.icon}
-                                                <span>{item.label}</span>
+                                                <span style={{ fontWeight: '600' }}>{item.label}</span>
                                             </div>
                                         </Link>
                                     ))}
-                                    <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '0.5rem 0' }} />
+                                    <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '1rem 0' }} />
                                     <button
                                         onClick={handleLogout}
                                         style={{
                                             display: 'flex',
                                             alignItems: 'center',
-                                            gap: '0.75rem',
-                                            padding: '0.75rem',
-                                            borderRadius: '10px',
+                                            gap: '1rem',
+                                            padding: '1rem',
+                                            borderRadius: '14px',
                                             color: '#f87171',
-                                            background: 'transparent',
-                                            border: 'none',
+                                            background: 'rgba(239, 68, 68, 0.05)',
+                                            border: '1px solid rgba(239, 68, 68, 0.1)',
                                             cursor: 'pointer',
                                             fontSize: '1rem',
+                                            fontWeight: '600',
                                             width: '100%',
                                             textAlign: 'left'
                                         }}
                                     >
-                                        <LogOut size={18} />
+                                        <LogOut size={20} />
                                         Sign Out
                                     </button>
                                 </>
                             ) : (
                                 <>
                                     <Link href="/" style={{ textDecoration: 'none' }} onClick={() => setIsOpen(false)}>
-                                        <div style={{ padding: '0.75rem', color: '#e2e8f0' }}>Home</div>
+                                        <div style={{ padding: '1rem', color: '#e2e8f0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>Home</div>
                                     </Link>
                                     <Link href="#features" style={{ textDecoration: 'none' }} onClick={() => setIsOpen(false)}>
-                                        <div style={{ padding: '0.75rem', color: '#e2e8f0' }}>Features</div>
+                                        <div style={{ padding: '1rem', color: '#e2e8f0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>Features</div>
                                     </Link>
-                                    <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '0.5rem 0' }} />
+                                    <div style={{ height: '20px' }}></div>
                                     <Link href="/login" style={{ textDecoration: 'none' }} onClick={() => setIsOpen(false)}>
                                         <button style={{
                                             width: '100%',
-                                            padding: '0.75rem',
-                                            borderRadius: '10px',
-                                            background: 'transparent',
+                                            padding: '1rem',
+                                            borderRadius: '14px',
+                                            background: 'rgba(255,255,255,0.05)',
                                             border: '1px solid rgba(255,255,255,0.2)',
                                             color: '#fff',
                                             cursor: 'pointer',
-                                            marginBottom: '0.5rem'
+                                            marginBottom: '1rem',
+                                            fontWeight: '600'
                                         }}>
                                             Log In
                                         </button>
@@ -493,13 +534,14 @@ export default function Navbar() {
                                     <Link href="/login?mode=register" style={{ textDecoration: 'none' }} onClick={() => setIsOpen(false)}>
                                         <button style={{
                                             width: '100%',
-                                            padding: '0.75rem',
-                                            borderRadius: '10px',
+                                            padding: '1rem',
+                                            borderRadius: '14px',
                                             background: 'linear-gradient(135deg, #a78bfa, #6366f1)',
                                             border: 'none',
                                             color: '#fff',
                                             cursor: 'pointer',
-                                            fontWeight: '600'
+                                            fontWeight: '700',
+                                            boxShadow: '0 10px 30px rgba(167, 139, 250, 0.3)'
                                         }}>
                                             Get Started
                                         </button>
