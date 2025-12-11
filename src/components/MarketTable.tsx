@@ -1,11 +1,8 @@
-
 'use client';
-
 
 import { useState, useEffect } from 'react';
 import styles from './MarketTable.module.css';
 import { RefreshCcw, Search, ChevronLeft, ChevronRight, Star } from 'lucide-react';
-
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 
@@ -28,7 +25,6 @@ export default function MarketTable() {
     const [searchTerm, setSearchTerm] = useState('');
     const [page, setPage] = useState(1);
     const [category, setCategory] = useState('market_cap_desc');
-
 
     // Auth for watchlist
     const { user, toggleWatchlist } = useAuth();

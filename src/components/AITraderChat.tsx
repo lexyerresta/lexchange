@@ -65,7 +65,7 @@ export default function AITraderChat() {
 
         let content = '';
         let suggestions: string[] = [];
-        let action = undefined;
+        let action: Message['action'] = undefined;
 
         if (lowerMsg.includes('portfolio') || lowerMsg.includes('my assets')) {
             content = AI_RESPONSES.portfolio[Math.floor(Math.random() * AI_RESPONSES.portfolio.length)];
