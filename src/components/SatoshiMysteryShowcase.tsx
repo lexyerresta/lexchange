@@ -2,352 +2,228 @@
 
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { motion, AnimatePresence } from 'framer-motion';
-
-// --- DATA & CONTENT ---
-const STORY_STAGES = {
-    BLOCKCHAIN: {
-        title: "THE PROTOCOL",
-        subtitle: "The immutable chain that started it all.",
-        instruction: "CLICK THE GENESIS BLOCK TO DECENTRALIZE"
-    },
-    UNIVERSE: {
-        title: "CAMBRIAN EXPLOSION",
-        subtitle: "Thousands of assets born from one idea.",
-        instruction: "FIND THE ORIGINAL COIN (BTC)"
-    },
-    SATOSHI: {
-        title: "SATOSHI NAKAMOTO",
-        subtitle: "Visionary. Creator. Ghost.",
-        instruction: "RETURN TO VOID"
-    }
-};
+import { motion } from 'framer-motion';
 
 export default function SatoshiMysteryShowcase() {
     const mountRef = useRef<HTMLDivElement>(null);
-    const [stage, setStage] = useState<'BLOCKCHAIN' | 'UNIVERSE' | 'SATOSHI'>('BLOCKCHAIN');
-    const [isHoveringInt, setIsHoveringInt] = useState(false);
-
-    // Refs for animation loop access without re-renders
-    const stageRef = useRef('BLOCKCHAIN');
-    useEffect(() => { stageRef.current = stage; }, [stage]);
 
     useEffect(() => {
         if (!mountRef.current) return;
 
-        // --- SCENE SETUP ---
-        const scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0x050505, 0.02);
-        scene.background = new THREE.Color(0x050505);
+        // --- 2020 CRYPTO AESTHETIC: "THE INTERCONNECTED WORLD" ---
+        // Dark, Neon Grids, Floating Data, Wireframe Globes.
 
-        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 0, 15);
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x020204); // Deep void black
+        // scene.fog = new THREE.FogExp2(0x020204, 0.035);
+
+        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.z = 16;
+        camera.position.y = 2;
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         mountRef.current.appendChild(renderer.domElement);
 
-        // --- GROUPS ---
-        const chainGroup = new THREE.Group();
-        const universeGroup = new THREE.Group();
-        const satoshiGroup = new THREE.Group();
+        // --- OBJECTS ---
+        const worldGroup = new THREE.Group();
+        scene.add(worldGroup);
 
-        scene.add(chainGroup);
-        scene.add(universeGroup);
-        scene.add(satoshiGroup);
-
-        // --- ASSETS GENERATION ---
-
-        // 1. THE BLOCKCHAIN (Stage 1)
-        const boxGeo = new THREE.BoxGeometry(1.5, 1.5, 1.5);
-        const boxMat = new THREE.MeshPhysicalMaterial({
-            color: 0x22d3ee,
-            metalness: 0.8,
-            roughness: 0.2,
-            emissive: 0x0044aa,
-            emissiveIntensity: 0.2,
+        // 1. THE NETWORK GLOBE (Core)
+        const globeGeo = new THREE.IcosahedronGeometry(4.5, 3); // Low-poly ish look
+        const globeMat = new THREE.MeshBasicMaterial({
+            color: 0x111111,
+            wireframe: false,
             transparent: true,
-            opacity: 0.9,
-            transmission: 0.5
+            opacity: 0.9
         });
-        const genesisMat = new THREE.MeshPhysicalMaterial({
-            color: 0xffd700,
-            metalness: 1,
-            roughness: 0.1,
-            emissive: 0xffaa00,
-            emissiveIntensity: 0.4
-        });
+        const globe = new THREE.Mesh(globeGeo, globeMat);
+        worldGroup.add(globe);
 
-        // Create 10 blocks linked together
-        const blocks: THREE.Mesh[] = [];
-        for (let i = -4; i <= 4; i++) {
-            const isGenesis = i === 0;
-            const mesh = new THREE.Mesh(boxGeo, isGenesis ? genesisMat : boxMat);
-            mesh.position.x = i * 2.5;
-
-            // Wireframe
-            const edges = new THREE.LineSegments(
-                new THREE.EdgesGeometry(boxGeo),
-                new THREE.LineBasicMaterial({ color: isGenesis ? 0xffffff : 0x00ffff, transparent: true, opacity: 0.3 })
-            );
-            mesh.add(edges);
-
-            // Connection Line
-            if (i > -4) {
-                const lineGeo = new THREE.BufferGeometry().setFromPoints([
-                    new THREE.Vector3(-1.25, 0, 0),
-                    new THREE.Vector3(1.25, 0, 0)
-                ]);
-                const line = new THREE.Line(lineGeo, new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.2 }));
-                line.position.x = -1.25;
-                mesh.add(line);
-            }
-
-            mesh.userData = { type: 'BLOCK', isGenesis };
-            chainGroup.add(mesh);
-            blocks.push(mesh);
-        }
-
-
-        // 2. CRYPTO UNIVERSE (Stage 2)
-        universeGroup.visible = false; // Interactable only in stage 2
-        const coins: THREE.Mesh[] = [];
-        const coinGeo = new THREE.SphereGeometry(0.4, 16, 16);
-
-        // Generate random altcoins
-        for (let i = 0; i < 150; i++) {
-            const color = new THREE.Color().setHSL(Math.random(), 0.8, 0.5);
-            const mat = new THREE.MeshStandardMaterial({
-                color,
-                metalness: 0.6,
-                roughness: 0.3,
-                emissive: color,
-                emissiveIntensity: 0.2
-            });
-            const mesh = new THREE.Mesh(coinGeo, mat);
-
-            // Random sphere distribution
-            const theta = Math.random() * Math.PI * 2;
-            const phi = Math.acos((Math.random() * 2) - 1);
-            const r = 4 + Math.random() * 8; // Radius between 4 and 12
-
-            mesh.position.set(
-                r * Math.sin(phi) * Math.cos(theta),
-                r * Math.sin(phi) * Math.sin(theta),
-                r * Math.cos(phi)
-            );
-
-            mesh.userData = {
-                type: 'COIN',
-                id: i,
-                velocity: new THREE.Vector3().randomDirection().multiplyScalar(0.01)
-            };
-            universeGroup.add(mesh);
-            coins.push(mesh);
-        }
-
-        // The BITCOIN (Hero Coin)
-        const btcGeo = new THREE.CylinderGeometry(1.2, 1.2, 0.2, 32);
-        const btcMat = new THREE.MeshStandardMaterial({
-            color: 0xff9900,
-            metalness: 0.9,
-            roughness: 0.1,
-            emissive: 0xff6600,
-            emissiveIntensity: 0.4
-        });
-        const btcCoin = new THREE.Mesh(btcGeo, btcMat);
-        btcCoin.rotation.x = Math.PI / 2;
-        btcCoin.userData = { type: 'BTC' };
-        // Add "B" symbol (simplified as box for now, or text)
-        // Keeping it simple geometry for stability
-        universeGroup.add(btcCoin);
-
-
-        // 3. SATOSHI (Stage 3)
-        satoshiGroup.visible = false;
-        // Abstract Digital Face particles
-        const faceParticlesCount = 3000;
-        const faceGeo = new THREE.BufferGeometry();
-        const facePos = new Float32Array(faceParticlesCount * 3);
-
-        for (let i = 0; i < faceParticlesCount; i++) {
-            // Silhouette logic
-            const theta = Math.random() * Math.PI * 2;
-            // Create a hood-like shape using math
-            const y = (Math.random() - 0.5) * 4;
-            const rBase = 1.5;
-            const r = rBase + Math.random() * 0.2;
-
-            facePos[i * 3] = r * Math.cos(theta); // x
-            facePos[i * 3 + 1] = y; // y
-            facePos[i * 3 + 2] = r * Math.sin(theta); // z
-
-            // Cutout for "Face" void
-            if (facePos[i * 3 + 2] > 0.5 && Math.abs(facePos[i * 3]) < 1 && Math.abs(y) < 1.5) {
-                // Push back to create hollow hood
-                facePos[i * 3 + 2] -= 1.5;
-            }
-        }
-        faceGeo.setAttribute('position', new THREE.BufferAttribute(facePos, 3));
-        const faceMat = new THREE.PointsMaterial({
-            color: 0x00ffff,
-            size: 0.03,
+        // 2. THE GRID (Wireframe Overlay)
+        const wireGeo = new THREE.WireframeGeometry(globeGeo);
+        const wireMat = new THREE.LineBasicMaterial({
+            color: 0x3b82f6, // Classic crypto blue
             transparent: true,
-            opacity: 0.6,
+            opacity: 0.15
+        });
+        const wireframe = new THREE.LineSegments(wireGeo, wireMat);
+        worldGroup.add(wireframe);
+
+        // 3. NODES (Connection Points)
+        const particleCount = 400;
+        const pGeo = new THREE.BufferGeometry();
+        const pPos = new Float32Array(particleCount * 3);
+
+        // Distribute points on sphere surface
+        for (let i = 0; i < particleCount; i++) {
+            const phi = Math.acos(-1 + (2 * i) / particleCount);
+            const theta = Math.sqrt(particleCount * Math.PI) * phi;
+            const r = 4.55; // Slightly above surface
+
+            pPos[i * 3] = r * Math.cos(theta) * Math.sin(phi);
+            pPos[i * 3 + 1] = r * Math.sin(theta) * Math.sin(phi);
+            pPos[i * 3 + 2] = r * Math.cos(phi);
+        }
+        pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+        const pMat = new THREE.PointsMaterial({
+            color: 0x60a5fa,
+            size: 0.08,
+            map: null,
+            transparent: true,
             blending: THREE.AdditiveBlending
         });
-        const faceMesh = new THREE.Points(faceGeo, faceMat);
-        satoshiGroup.add(faceMesh);
+        const nodes = new THREE.Points(pGeo, pMat);
+        worldGroup.add(nodes);
 
 
-        // --- LIGHTING ---
-        const ambLight = new THREE.AmbientLight(0xffffff, 0.2);
-        scene.add(ambLight);
+        // 4. ORBITING ASSETS (Satellites)
+        const satellites: THREE.Mesh[] = [];
+        const satColors = [0xf7931a, 0x627eea, 0x14f195, 0xe84142]; // BTC, ETH, SOL, AVAX colors
 
-        const mainLight = new THREE.PointLight(0xffffff, 2, 50);
-        mainLight.position.set(5, 5, 5);
-        scene.add(mainLight);
+        satColors.forEach((color, i) => {
+            const satGeo = new THREE.OctahedronGeometry(0.3, 0); // Geometric tech shape
+            const satMat = new THREE.MeshBasicMaterial({
+                color: color,
+                wireframe: true
+            });
+            const sat = new THREE.Mesh(satGeo, satMat);
 
-        const blueLight = new THREE.PointLight(0x00ffff, 2, 30);
-        blueLight.position.set(-5, -5, 5);
-        scene.add(blueLight);
+            // Inner glow core
+            const core = new THREE.Mesh(
+                new THREE.OctahedronGeometry(0.1, 0),
+                new THREE.MeshBasicMaterial({ color: 0xffffff })
+            );
+            sat.add(core);
+
+            // Orbit Group (Pivot)
+            const pivot = new THREE.Group();
+            pivot.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
+
+            sat.userData = {
+                radius: 6 + i,
+                speed: 0.005 + (Math.random() * 0.005),
+                angle: Math.random() * Math.PI * 2
+            };
+
+            pivot.add(sat); // Add sat to pivot, we will animate sat position relative to pivot
+            worldGroup.add(pivot);
+            satellites.push(sat);
+
+            // Add trail ring
+            const trailGeo = new THREE.RingGeometry(sat.userData.radius - 0.02, sat.userData.radius + 0.02, 64);
+            const trailMat = new THREE.MeshBasicMaterial({
+                color: color,
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: 0.1
+            });
+            const trail = new THREE.Mesh(trailGeo, trailMat);
+            trail.rotation.x = Math.PI / 2; // Flat ring
+            pivot.add(trail);
+        });
+
+        // 5. DATA BEAMS (Shooting out)
+        const beamGeo = new THREE.CylinderGeometry(0.02, 0.02, 10, 8);
+        const beamMat = new THREE.MeshBasicMaterial({
+            color: 0x00ffff,
+            transparent: true,
+            opacity: 0
+        }); // Initially invisible
+        const beams: THREE.Mesh[] = [];
+        for (let i = 0; i < 5; i++) {
+            const beam = new THREE.Mesh(beamGeo, beamMat.clone());
+            beam.rotation.x = Math.PI / 2;
+            beam.userData = {
+                active: false,
+                speed: 0,
+                progress: 0
+            };
+            worldGroup.add(beam);
+            beams.push(beam);
+        }
 
 
-        // --- LOGIC & ANIMATION ---
-
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
+        // --- INTERACTION ---
+        let mouseX = 0;
+        let mouseY = 0;
+        let targetRotX = 0;
+        let targetRotY = 0;
 
         const onMouseMove = (e: MouseEvent) => {
-            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+            mouseX = (e.clientX - window.innerWidth / 2) * 0.001;
+            mouseY = (e.clientY - window.innerHeight / 2) * 0.001;
         };
-
-        const onClick = () => {
-            // Raycast checks
-            raycaster.setFromCamera(mouse, camera);
-            let intersects;
-
-            if (stageRef.current === 'BLOCKCHAIN') {
-                // Check for center block (Genesis)
-                intersects = raycaster.intersectObjects(chainGroup.children);
-                if (intersects.length > 0) {
-                    setStage('UNIVERSE');
-                }
-            } else if (stageRef.current === 'UNIVERSE') {
-                // Check for BTC
-                intersects = raycaster.intersectObject(btcCoin);
-                if (intersects.length > 0) {
-                    setStage('SATOSHI');
-                }
-            } else if (stageRef.current === 'SATOSHI') {
-                setStage('BLOCKCHAIN'); // Reset
-            }
-        };
-
         window.addEventListener('mousemove', onMouseMove);
-        window.addEventListener('click', onClick);
 
-        // Animation Loop
+
+        // --- ANIMATION ---
         const clock = new THREE.Clock();
 
         const animate = () => {
             requestAnimationFrame(animate);
             const time = clock.getElapsedTime();
-            const currentStage = stageRef.current; // Use Ref for updated value in loop
 
-            // TRANSITIONS & VISIBILITY
-            // Simple approach: Toggle visibility and animate properties
+            // Smooth Rotation Control
+            targetRotY += 0.002; // Auto rotate
+            targetRotY += mouseX * 0.05; // Mouse influence
+            targetRotX += mouseY * 0.05;
 
-            // CAMERA
-            // Gentle float
-            camera.position.x += (mouse.x * 2 - camera.position.x) * 0.05;
-            camera.position.y += (mouse.y * 2 - camera.position.y) * 0.05;
-            camera.lookAt(0, 0, 0);
+            worldGroup.rotation.y += (targetRotY - worldGroup.rotation.y) * 0.05;
+            worldGroup.rotation.x += (targetRotX - worldGroup.rotation.x) * 0.05;
 
-            // STAGE 1: BLOCKCHAIN
-            if (currentStage === 'BLOCKCHAIN') {
-                chainGroup.visible = true;
-                universeGroup.visible = false;
-                satoshiGroup.visible = false;
+            // Pulse Wireframe color
+            const hue = (time * 0.05) % 1;
+            // wireMat.color.setHSL(0.6, 0.8, 0.5 + Math.sin(time)*0.1); 
 
-                camera.position.z = THREE.MathUtils.lerp(camera.position.z, 15, 0.05);
+            // Animate Satellites
+            satellites.forEach((sat) => {
+                const data = sat.userData;
+                data.angle += data.speed;
+                sat.position.set(
+                    Math.cos(data.angle) * data.radius,
+                    0,
+                    Math.sin(data.angle) * data.radius
+                );
+                sat.rotation.x += 0.02;
+                sat.rotation.z += 0.02;
+            });
 
-                // Rotate chain slightly
-                chainGroup.rotation.y = Math.sin(time * 0.2) * 0.2;
-                chainGroup.rotation.z = Math.sin(time * 0.1) * 0.1;
+            // Animate Beams (Data transactions)
+            beams.forEach(beam => {
+                if (!beam.userData.active) {
+                    if (Math.random() > 0.98) {
+                        // Reset and activate
+                        beam.userData.active = true;
+                        beam.userData.progress = 0;
+                        beam.userData.speed = 0.5 + Math.random();
 
-                // Pulse Genesis Block
-                blocks[4].rotation.x += 0.02; // Center block rotates faster
-                blocks[4].rotation.y += 0.02;
-
-                // Raycast Highlight
-                raycaster.setFromCamera(mouse, camera);
-                const intersects = raycaster.intersectObjects(chainGroup.children);
-                document.body.style.cursor = intersects.length > 0 ? 'pointer' : 'default';
-
-            }
-            // STAGE 2: UNIVERSE
-            else if (currentStage === 'UNIVERSE') {
-                chainGroup.visible = false;
-                universeGroup.visible = true;
-                satoshiGroup.visible = false;
-
-                camera.position.z = THREE.MathUtils.lerp(camera.position.z, 20, 0.05);
-
-                // Orbit Universe
-                universeGroup.rotation.y += 0.002;
-
-                // Main BTC Spin
-                btcCoin.rotation.z += 0.01;
-                btcCoin.rotation.x = Math.PI / 2 + Math.sin(time) * 0.2;
-
-                // Raycast Highlight for BTC
-                raycaster.setFromCamera(mouse, camera);
-                const intersects = raycaster.intersectObject(btcCoin);
-
-                if (intersects.length > 0) {
-                    btcCoin.scale.lerp(new THREE.Vector3(1.2, 1.2, 1.2), 0.1);
-                    (btcCoin.material as THREE.MeshStandardMaterial).emissiveIntensity = 1;
-                    document.body.style.cursor = 'pointer';
+                        // Random direction from center
+                        beam.lookAt(new THREE.Vector3(
+                            (Math.random() - 0.5), (Math.random() - 0.5), (Math.random() - 0.5)
+                        ));
+                        (beam.material as THREE.MeshBasicMaterial).opacity = 0.6;
+                        beam.scale.y = 0.1;
+                    }
                 } else {
-                    btcCoin.scale.lerp(new THREE.Vector3(1, 1, 1), 0.1);
-                    (btcCoin.material as THREE.MeshStandardMaterial).emissiveIntensity = 0.4;
-                    document.body.style.cursor = 'default';
-                }
+                    beam.userData.progress += beam.userData.speed;
+                    beam.translateZ(beam.userData.speed);
+                    beam.scale.y += 0.5; // Stretch as it flies
 
-                // Float coins
-                coins.forEach(c => {
-                    c.rotation.x += 0.01;
-                    c.position.add(c.userData.velocity);
-                    // Boundary check to keep them somewhat contained
-                    if (c.position.length() > 15) c.userData.velocity.negate();
-                });
-            }
-            // STAGE 3: SATOSHI
-            else if (currentStage === 'SATOSHI') {
-                chainGroup.visible = false;
-                universeGroup.visible = false;
-                satoshiGroup.visible = true;
+                    const mat = beam.material as THREE.MeshBasicMaterial;
+                    mat.opacity -= 0.02;
 
-                camera.position.z = THREE.MathUtils.lerp(camera.position.z, 6, 0.05);
-
-                // Morphing face
-                faceMesh.rotation.y = Math.sin(time * 0.5) * 0.2;
-
-                // Glitch effect on particles
-                const positions = faceGeo.attributes.position.array as Float32Array;
-                for (let i = 0; i < faceParticlesCount; i++) {
-                    if (Math.random() > 0.99) {
-                        positions[i * 3] += (Math.random() - 0.5) * 0.2;
-                    } else {
-                        // Return to original? (Simplified: just chaotic vibration here)
+                    if (mat.opacity <= 0 || beam.position.length() > 15) {
+                        beam.userData.active = false;
+                        beam.position.set(0, 0, 0);
+                        beam.scale.y = 0.1;
                     }
                 }
-                faceGeo.attributes.position.needsUpdate = true;
-                document.body.style.cursor = 'pointer'; // Reset allowed
-            }
+            });
+
+            // Camera subtle float
+            camera.position.y = 2 + Math.sin(time * 0.5) * 0.5;
 
             renderer.render(scene, camera);
         };
@@ -363,7 +239,6 @@ export default function SatoshiMysteryShowcase() {
 
         return () => {
             window.removeEventListener('mousemove', onMouseMove);
-            window.removeEventListener('click', onClick);
             window.removeEventListener('resize', handleResize);
             if (mountRef.current && renderer.domElement) {
                 mountRef.current.removeChild(renderer.domElement);
@@ -372,103 +247,93 @@ export default function SatoshiMysteryShowcase() {
         };
     }, []);
 
-    const content = STORY_STAGES[stage];
-
     return (
         <section id="showcase" style={{
             height: '100vh',
             position: 'relative',
             overflow: 'hidden',
-            background: 'black',
-            color: 'white'
+            background: 'linear-gradient(to bottom, #000000 0%, #050510 100%)'
         }}>
             <div ref={mountRef} style={{ width: '100%', height: '100%', position: 'absolute' }} />
 
-            {/* UI LAYER */}
+            {/* TEXT OVERLAY */}
             <div style={{
                 position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                pointerEvents: 'none',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                alignItems: 'center',
-                textAlign: 'center',
-                zIndex: 10
+                top: '50%',
+                left: '10%',
+                transform: 'translateY(-50%)',
+                color: 'white',
+                zIndex: 10,
+                maxWidth: '600px',
+                pointerEvents: 'none' // Let mouse pass through to canvas
             }}>
-                <AnimatePresence mode='wait'>
-                    <motion.div
-                        key={stage}
-                        initial={{ opacity: 0, y: 20, filter: 'blur(10px)' }}
-                        animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                        exit={{ opacity: 0, y: -20, filter: 'blur(10px)' }}
-                        transition={{ duration: 0.8 }}
-                    >
-                        <h5 style={{
-                            color: '#22d3ee',
-                            letterSpacing: '0.2em',
-                            marginBottom: '1rem',
-                            fontWeight: '600'
-                        }}>
-                            /// {stage} LAYER ///
-                        </h5>
-                        <h1 style={{
-                            fontSize: 'clamp(3rem, 6vw, 5rem)',
-                            fontWeight: '900',
-                            lineHeight: 1,
-                            marginBottom: '1rem',
-                            textShadow: '0 0 30px rgba(255,255,255,0.2)'
-                        }}>
-                            {content.title}
-                        </h1>
-                        <p style={{
-                            fontSize: '1.2rem',
-                            color: '#94a3b8',
-                            maxWidth: '600px',
-                            margin: '0 auto 2rem'
-                        }}>
-                            {content.subtitle}
-                        </p>
+                <motion.div
+                    initial={{ opacity: 0, x: -50 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 1 }}
+                >
+                    <h4 style={{
+                        color: '#60a5fa',
+                        fontSize: '1rem',
+                        letterSpacing: '0.3em',
+                        marginBottom: '1.5rem',
+                        fontWeight: '600'
+                    }}>
+                        DECENTRALIZED NETWORK
+                    </h4>
+                    <h1 style={{
+                        fontSize: 'clamp(3rem, 5vw, 4.5rem)',
+                        fontWeight: '800',
+                        lineHeight: 1.1,
+                        marginBottom: '1.5rem',
+                        background: 'linear-gradient(to right, #fff, #94a3b8)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent'
+                    }}>
+                        Connecting the<br />Digital World.
+                    </h1>
+                    <p style={{
+                        fontSize: '1.1rem',
+                        color: '#94a3b8',
+                        lineHeight: 1.6,
+                        marginBottom: '2.5rem'
+                    }}>
+                        A borderless infrastructure where value flows as freely as information.
+                        Secure, transparent, and built for the future of finance.
+                    </p>
 
-                        <div style={{
-                            display: 'inline-block',
-                            border: '1px solid rgba(255,255,255,0.2)',
-                            padding: '10px 20px',
-                            background: 'rgba(0,0,0,0.5)',
-                            backdropFilter: 'blur(10px)',
-                            borderRadius: '30px',
-                            fontSize: '0.9rem',
-                            color: '#fff',
-                            letterSpacing: '0.1em'
-                        }}>
-                            [ {content.instruction} ]
+                    <div style={{ display: 'flex', gap: '2rem' }}>
+                        <div>
+                            <div style={{ fontSize: '1.5rem', color: '#fff', fontWeight: '700' }}>24/7</div>
+                            <div style={{ fontSize: '0.9rem', color: '#64748b' }}>UPTIME</div>
                         </div>
-                    </motion.div>
-                </AnimatePresence>
+                        <div>
+                            <div style={{ fontSize: '1.5rem', color: '#fff', fontWeight: '700' }}>100K+</div>
+                            <div style={{ fontSize: '0.9rem', color: '#64748b' }}>NODES</div>
+                        </div>
+                        <div>
+                            <div style={{ fontSize: '1.5rem', color: '#fff', fontWeight: '700' }}>$0.00</div>
+                            <div style={{ fontSize: '0.9rem', color: '#64748b' }}>DOWNTIME</div>
+                        </div>
+                    </div>
+                </motion.div>
             </div>
 
-            {/* Nav Dots */}
+            {/* VIGNETTE & SCANLINES for Retro Feel */}
             <div style={{
                 position: 'absolute',
-                bottom: '40px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                display: 'flex',
-                gap: '10px'
-            }}>
-                {Object.keys(STORY_STAGES).map((s) => (
-                    <div key={s} style={{
-                        width: '8px',
-                        height: '8px',
-                        borderRadius: '50%',
-                        background: stage === s ? '#22d3ee' : '#333',
-                        transition: 'background 0.3s'
-                    }} />
-                ))}
-            </div>
+                top: 0, left: 0, right: 0, bottom: 0,
+                background: 'radial-gradient(circle at center, transparent 0%, #000 90%)',
+                pointerEvents: 'none'
+            }} />
+            <div style={{
+                position: 'absolute',
+                top: 0, left: 0, right: 0, bottom: 0,
+                background: 'linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%)',
+                backgroundSize: '100% 4px',
+                pointerEvents: 'none',
+                opacity: 0.3
+            }} />
         </section>
     );
 }
