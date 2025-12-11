@@ -11,6 +11,7 @@ import FloatingAIButton from "@/components/FloatingAIButton";
 import LivePriceTicker from "@/components/LivePriceTicker";
 import HolographicCard from "@/components/HolographicCard";
 import ParticleCursor from "@/components/ParticleCursor";
+import QuickSwapWidget from "@/components/QuickSwapWidget";
 import LoadingScreen from "@/components/LoadingScreen";
 import StatsGrid from "@/components/StatsGrid";
 import { Zap, Shield, TrendingUp, Users, Bot, Eye } from 'lucide-react';
@@ -94,6 +95,32 @@ export default function Home() {
             { value: 156, label: 'Average ROI', suffix: '%', decimals: 0, color: '#4ade80' },
             { value: 99.9, label: 'Uptime', suffix: '%', decimals: 1, color: '#fbbf24' }
           ]} />
+        </section>
+
+        {/* Quick Swap Section */}
+        <section style={{
+          padding: '4rem 2rem',
+          maxWidth: '1400px',
+          margin: '0 auto',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '2rem',
+          transform: `translateY(${Math.max(0, (scrollY - 200) * -0.05)}px)`,
+          opacity: Math.min(1, Math.max(0, (scrollY - 50) / 200))
+        }}>
+          <div style={{ textAlign: 'center' }}>
+            <h2 style={{
+              fontSize: '2rem',
+              fontWeight: '700',
+              color: 'white',
+              marginBottom: '1rem',
+            }}>
+              Instant <span style={{ color: '#a78bfa' }}>Swap</span>
+            </h2>
+            <p style={{ color: '#9ca3af' }}>Zero fees, infinite liquidity, lightning fast.</p>
+          </div>
+          <QuickSwapWidget />
         </section>
 
         {/* 3D Showcase Section */}

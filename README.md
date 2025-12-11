@@ -76,51 +76,40 @@ Lexchange isn't just another crypto exchange. It's a **next-generation trading p
 - **Smooth Transitions** - 60fps performance
 - **Applied to Features** - All feature cards have holographic effect
 
-### 🎨 3D Showcase - "Crypto Mandala" (Balinese Theme)
+#### Instant Swap Widget
+- **Glassmorphism Design** - High-quality translucent styling
+- **Mock Interaction** - Functional inputs and token selectors
+- **Dynamic Rates** - Simulates live exchange rate updates
+- **Neon Accents** - Matches the cyberpunk/crypto aesthetic
+- **Responsive** - Smooth hover and focus states
 
-Inspired by traditional Balinese mandalas and sacred geometry, our 3D visualization represents the crypto universe as a harmonious, interconnected system.
+### 🎨 3D Showcase - "Network Globe" (Retro-Futuristic)
+
+A high-fidelity visualization of the decentralized web, inspired by the "Golden Era" of 2020 crypto aesthetics.
 
 #### Design Philosophy:
-- **Center (BTC)** - The sun/center of the universe (Surya)
-- **Orbiting Coins** - Planets in cosmic harmony
-- **Particle Field** - Stars and cosmic energy
-- **Dynamic Lights** - Divine illumination from multiple sources
-- **Sacred Geometry** - Circular patterns representing balance
+- **Connected World** - A wireframe globe representing the borderless nature of crypto.
+- **Orbiting Satellite** - Token assets (BTC, ETH, SOL) orbiting the central network.
+- **Data Beams** - Visualizing transactions shooting across the network.
+- **Retro-Future** - Cyan/Blue/Purple neon palette with scanline overlays.
+- **Precision** - Clean lines, geometric shapes, and smooth icosahedron structures.
 
 #### Technical Specifications:
-- **Canvas Size**: 700px height, full-width responsive
-- **Coin Dimensions**:
-  - Bitcoin (Center): 2.0 scale units (largest)
-  - Ethereum: 1.5 scale units
-  - Solana: 1.2 scale units
-  - BNB: 1.1 scale units
-  - USDT: 1.0 scale units
-- **Coin Structure**:
-  - Main body: Cylinder (radius: 1, height: 0.3, segments: 64)
-  - Edge ring: Torus (radius: 1.05, tube: 0.15)
-  - Metalness: 0.95 (mirror-like)
-  - Roughness: 0.05 (smooth)
-  - Clearcoat: 1.0 (glossy finish)
-- **Particles**: 3000 points
-  - Colors: Gold (30%), Green (30%), Purple (40%)
-  - Size: 0.05-0.2 units
-  - Additive blending for glow effect
-- **Lighting**:
-  - 1 Ambient light (0.3 intensity)
-  - 1 Directional light (main illumination)
-  - 5 Point lights (colored, orbiting)
-  - Light colors: Orange, Blue, Green, Purple, Cyan
-  - Light intensity: 3-5 (pulsing)
-- **Camera**:
-  - FOV: 75 degrees
-  - Position: (0, 3, 15)
-  - Smooth parallax following mouse
-- **Animation**:
-  - Coin rotation: 0.015 rad/frame
-  - Orbit speed: 0.15-0.25 rad/s
-  - Orbit radius: 5-8 units
-  - Floating amplitude: 0.5-0.8 units
-  - Frame rate: 60 FPS
+- **Canvas Size**: Full-viewport responsive
+- **Core Geometry**: Icosahedron with Wireframe overlay
+- **Satellites**:
+  - Octahedron geometry with inner glowing cores
+  - Independent orbit speeds and radii
+  - Trailing rings (DoubleSide geometry)
+- **Data Beams**:
+  - Cylinder geometry with opacity fade
+  - Random activation logic
+- **Interactivity**:
+  - Mouse-controlled rotation with smooth damping (lerp)
+  - Interactive camera tilt
+- **Post-Processing**:
+  - Vignette overlay
+  - Scanline texture overlay for monitor effect
 
 ### 🤖 AI-Powered Trading (REVOLUTIONARY!)
 
@@ -182,7 +171,7 @@ Inspired by traditional Balinese mandalas and sacred geometry, our 3D visualizat
 
 ### Design Philosophy
 - **Apple-Level Aesthetics** - Glassmorphism, gradients, smooth animations
-- **Balinese Inspiration** - Sacred geometry, harmony, balance
+- **Retro-Futuristic** - Inspired by the 2020 crypto golden era
 - **60 FPS Animations** - Buttery smooth performance across all interactions
 - **Dark Mode First** - Easy on the eyes with vibrant accents
 - **Mobile Responsive** - Works flawlessly on all devices
