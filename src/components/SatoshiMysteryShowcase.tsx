@@ -4,267 +4,356 @@ import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// --- DATA & CONTENT ---
+const STORY_STAGES = {
+    BLOCKCHAIN: {
+        title: "THE PROTOCOL",
+        subtitle: "The immutable chain that started it all.",
+        instruction: "CLICK THE GENESIS BLOCK TO DECENTRALIZE"
+    },
+    UNIVERSE: {
+        title: "CAMBRIAN EXPLOSION",
+        subtitle: "Thousands of assets born from one idea.",
+        instruction: "FIND THE ORIGINAL COIN (BTC)"
+    },
+    SATOSHI: {
+        title: "SATOSHI NAKAMOTO",
+        subtitle: "Visionary. Creator. Ghost.",
+        instruction: "RETURN TO VOID"
+    }
+};
+
 export default function SatoshiMysteryShowcase() {
     const mountRef = useRef<HTMLDivElement>(null);
-    const [hoveredBlock, setHoveredBlock] = useState<any>(null);
+    const [stage, setStage] = useState<'BLOCKCHAIN' | 'UNIVERSE' | 'SATOSHI'>('BLOCKCHAIN');
+    const [isHoveringInt, setIsHoveringInt] = useState(false);
 
-    const currentHoverIdRef = useRef<string | null>(null);
+    // Refs for animation loop access without re-renders
+    const stageRef = useRef('BLOCKCHAIN');
+    useEffect(() => { stageRef.current = stage; }, [stage]);
 
     useEffect(() => {
         if (!mountRef.current) return;
 
-        let animationFrameId: number;
-
-        // --- SETUP ---
+        // --- SCENE SETUP ---
         const scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0x000000, 0.02);
+        scene.fog = new THREE.FogExp2(0x050505, 0.02);
+        scene.background = new THREE.Color(0x050505);
 
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.z = 15;
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 0, 15);
 
-        const renderer = new THREE.WebGLRenderer({
-            alpha: true,
-            antialias: true,
-            powerPreference: "high-performance"
-        });
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         mountRef.current.appendChild(renderer.domElement);
 
-        // --- INTERACTIVITY STATE ---
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
-        let isBoosting = false;
-        let speed = 5;
-        let cameraShake = 0;
+        // --- GROUPS ---
+        const chainGroup = new THREE.Group();
+        const universeGroup = new THREE.Group();
+        const satoshiGroup = new THREE.Group();
 
-        // --- OBJECTS ---
+        scene.add(chainGroup);
+        scene.add(universeGroup);
+        scene.add(satoshiGroup);
 
-        // 1. NEON BLOCKS (Interactive)
-        const geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5);
-        // InstancedMesh not used for simplicity of individual interaction/anim logic here, 
-        // using Group of Mesh for max visual fidelity per block
-        const blocks: THREE.Mesh[] = [];
-        const blockGroup = new THREE.Group();
-        scene.add(blockGroup);
+        // --- ASSETS GENERATION ---
 
-        const material = new THREE.MeshPhysicalMaterial({
-            color: 0x000000,
-            emissive: 0x00ffff,
-            emissiveIntensity: 0.5,
-            metalness: 0.9,
-            roughness: 0.1,
+        // 1. THE BLOCKCHAIN (Stage 1)
+        const boxGeo = new THREE.BoxGeometry(1.5, 1.5, 1.5);
+        const boxMat = new THREE.MeshPhysicalMaterial({
+            color: 0x22d3ee,
+            metalness: 0.8,
+            roughness: 0.2,
+            emissive: 0x0044aa,
+            emissiveIntensity: 0.2,
             transparent: true,
             opacity: 0.9,
+            transmission: 0.5
+        });
+        const genesisMat = new THREE.MeshPhysicalMaterial({
+            color: 0xffd700,
+            metalness: 1,
+            roughness: 0.1,
+            emissive: 0xffaa00,
+            emissiveIntensity: 0.4
         });
 
-        // Create initial field of blocks
-        for (let i = 0; i < 60; i++) {
-            const mesh = new THREE.Mesh(geometry, material.clone());
+        // Create 10 blocks linked together
+        const blocks: THREE.Mesh[] = [];
+        for (let i = -4; i <= 4; i++) {
+            const isGenesis = i === 0;
+            const mesh = new THREE.Mesh(boxGeo, isGenesis ? genesisMat : boxMat);
+            mesh.position.x = i * 2.5;
 
-            // Random placement in a tunnel shape
-            const angle = Math.random() * Math.PI * 2;
-            const radius = 5 + Math.random() * 8;
-
-            mesh.position.set(
-                Math.cos(angle) * radius,
-                Math.sin(angle) * radius,
-                (Math.random() - 0.5) * 100 - 50 // Spread depth
+            // Wireframe
+            const edges = new THREE.LineSegments(
+                new THREE.EdgesGeometry(boxGeo),
+                new THREE.LineBasicMaterial({ color: isGenesis ? 0xffffff : 0x00ffff, transparent: true, opacity: 0.3 })
             );
-
-            mesh.rotation.set(Math.random(), Math.random(), Math.random());
-
-            // Custom data for gameplay/interaction
-            mesh.userData = {
-                id: `BLK-${Math.floor(Math.random() * 999999)}`,
-                txCount: Math.floor(Math.random() * 5000),
-                rotationSpeed: new THREE.Vector3(
-                    (Math.random() - 0.5) * 0.05,
-                    (Math.random() - 0.5) * 0.05,
-                    (Math.random() - 0.5) * 0.05
-                ),
-                originalScale: 1
-            };
-
-            // Add wireframe cage
-            const edgeGeo = new THREE.EdgesGeometry(geometry);
-            const edgeMat = new THREE.LineBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.3 });
-            const edges = new THREE.LineSegments(edgeGeo, edgeMat);
             mesh.add(edges);
 
-            blockGroup.add(mesh);
+            // Connection Line
+            if (i > -4) {
+                const lineGeo = new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(-1.25, 0, 0),
+                    new THREE.Vector3(1.25, 0, 0)
+                ]);
+                const line = new THREE.Line(lineGeo, new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.2 }));
+                line.position.x = -1.25;
+                mesh.add(line);
+            }
+
+            mesh.userData = { type: 'BLOCK', isGenesis };
+            chainGroup.add(mesh);
             blocks.push(mesh);
         }
 
-        // 2. STARGATE TUNNEL (Particles)
-        const starGeo = new THREE.BufferGeometry();
-        const starCount = 3000;
-        const starPos = new Float32Array(starCount * 3);
-        const starSpeed = new Float32Array(starCount);
 
-        for (let i = 0; i < starCount; i++) {
-            const r = 2 + Math.random() * 30;
+        // 2. CRYPTO UNIVERSE (Stage 2)
+        universeGroup.visible = false; // Interactable only in stage 2
+        const coins: THREE.Mesh[] = [];
+        const coinGeo = new THREE.SphereGeometry(0.4, 16, 16);
+
+        // Generate random altcoins
+        for (let i = 0; i < 150; i++) {
+            const color = new THREE.Color().setHSL(Math.random(), 0.8, 0.5);
+            const mat = new THREE.MeshStandardMaterial({
+                color,
+                metalness: 0.6,
+                roughness: 0.3,
+                emissive: color,
+                emissiveIntensity: 0.2
+            });
+            const mesh = new THREE.Mesh(coinGeo, mat);
+
+            // Random sphere distribution
             const theta = Math.random() * Math.PI * 2;
-            starPos[i * 3] = r * Math.cos(theta);
-            starPos[i * 3 + 1] = r * Math.sin(theta);
-            starPos[i * 3 + 2] = (Math.random() - 0.5) * 200;
-            starSpeed[i] = 0.5 + Math.random();
+            const phi = Math.acos((Math.random() * 2) - 1);
+            const r = 4 + Math.random() * 8; // Radius between 4 and 12
+
+            mesh.position.set(
+                r * Math.sin(phi) * Math.cos(theta),
+                r * Math.sin(phi) * Math.sin(theta),
+                r * Math.cos(phi)
+            );
+
+            mesh.userData = {
+                type: 'COIN',
+                id: i,
+                velocity: new THREE.Vector3().randomDirection().multiplyScalar(0.01)
+            };
+            universeGroup.add(mesh);
+            coins.push(mesh);
         }
-        starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
-        const starMat = new THREE.PointsMaterial({
-            color: 0xffffff,
-            size: 0.1,
-            transparent: true,
-            opacity: 0.8
+
+        // The BITCOIN (Hero Coin)
+        const btcGeo = new THREE.CylinderGeometry(1.2, 1.2, 0.2, 32);
+        const btcMat = new THREE.MeshStandardMaterial({
+            color: 0xff9900,
+            metalness: 0.9,
+            roughness: 0.1,
+            emissive: 0xff6600,
+            emissiveIntensity: 0.4
         });
-        const starTunnel = new THREE.Points(starGeo, starMat);
-        scene.add(starTunnel);
+        const btcCoin = new THREE.Mesh(btcGeo, btcMat);
+        btcCoin.rotation.x = Math.PI / 2;
+        btcCoin.userData = { type: 'BTC' };
+        // Add "B" symbol (simplified as box for now, or text)
+        // Keeping it simple geometry for stability
+        universeGroup.add(btcCoin);
+
+
+        // 3. SATOSHI (Stage 3)
+        satoshiGroup.visible = false;
+        // Abstract Digital Face particles
+        const faceParticlesCount = 3000;
+        const faceGeo = new THREE.BufferGeometry();
+        const facePos = new Float32Array(faceParticlesCount * 3);
+
+        for (let i = 0; i < faceParticlesCount; i++) {
+            // Silhouette logic
+            const theta = Math.random() * Math.PI * 2;
+            // Create a hood-like shape using math
+            const y = (Math.random() - 0.5) * 4;
+            const rBase = 1.5;
+            const r = rBase + Math.random() * 0.2;
+
+            facePos[i * 3] = r * Math.cos(theta); // x
+            facePos[i * 3 + 1] = y; // y
+            facePos[i * 3 + 2] = r * Math.sin(theta); // z
+
+            // Cutout for "Face" void
+            if (facePos[i * 3 + 2] > 0.5 && Math.abs(facePos[i * 3]) < 1 && Math.abs(y) < 1.5) {
+                // Push back to create hollow hood
+                facePos[i * 3 + 2] -= 1.5;
+            }
+        }
+        faceGeo.setAttribute('position', new THREE.BufferAttribute(facePos, 3));
+        const faceMat = new THREE.PointsMaterial({
+            color: 0x00ffff,
+            size: 0.03,
+            transparent: true,
+            opacity: 0.6,
+            blending: THREE.AdditiveBlending
+        });
+        const faceMesh = new THREE.Points(faceGeo, faceMat);
+        satoshiGroup.add(faceMesh);
 
 
         // --- LIGHTING ---
-        const pointLight = new THREE.PointLight(0x00ffff, 2, 50);
-        pointLight.position.set(0, 0, 10);
-        scene.add(pointLight);
-        scene.add(new THREE.AmbientLight(0x404040));
+        const ambLight = new THREE.AmbientLight(0xffffff, 0.2);
+        scene.add(ambLight);
+
+        const mainLight = new THREE.PointLight(0xffffff, 2, 50);
+        mainLight.position.set(5, 5, 5);
+        scene.add(mainLight);
+
+        const blueLight = new THREE.PointLight(0x00ffff, 2, 30);
+        blueLight.position.set(-5, -5, 5);
+        scene.add(blueLight);
 
 
-        // --- EVENTS ---
+        // --- LOGIC & ANIMATION ---
+
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
         const onMouseMove = (e: MouseEvent) => {
             mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
             mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
         };
 
-        const onMouseDown = () => {
-            isBoosting = true;
-            cameraShake = 0.2;
-        };
+        const onClick = () => {
+            // Raycast checks
+            raycaster.setFromCamera(mouse, camera);
+            let intersects;
 
-        const onMouseUp = () => {
-            isBoosting = false;
-            cameraShake = 0;
+            if (stageRef.current === 'BLOCKCHAIN') {
+                // Check for center block (Genesis)
+                intersects = raycaster.intersectObjects(chainGroup.children);
+                if (intersects.length > 0) {
+                    setStage('UNIVERSE');
+                }
+            } else if (stageRef.current === 'UNIVERSE') {
+                // Check for BTC
+                intersects = raycaster.intersectObject(btcCoin);
+                if (intersects.length > 0) {
+                    setStage('SATOSHI');
+                }
+            } else if (stageRef.current === 'SATOSHI') {
+                setStage('BLOCKCHAIN'); // Reset
+            }
         };
 
         window.addEventListener('mousemove', onMouseMove);
-        window.addEventListener('mousedown', onMouseDown);
-        window.addEventListener('mouseup', onMouseUp);
+        window.addEventListener('click', onClick);
 
-
-        // --- ANIMATION ---
+        // Animation Loop
         const clock = new THREE.Clock();
 
         const animate = () => {
-            const delta = clock.getDelta();
+            requestAnimationFrame(animate);
             const time = clock.getElapsedTime();
+            const currentStage = stageRef.current; // Use Ref for updated value in loop
 
-            // 1. Movement & Speed
-            const targetSpeed = isBoosting ? 40 : 8;
-            speed += (targetSpeed - speed) * 0.1;
+            // TRANSITIONS & VISIBILITY
+            // Simple approach: Toggle visibility and animate properties
 
-            // 2. Camera Input (Fly Controls)
-            // Camera tilts towards mouse
-            camera.rotation.x += (-mouse.y * 0.5 - camera.rotation.x) * 0.1;
-            camera.rotation.y += (-mouse.x * 0.5 - camera.rotation.y) * 0.1;
+            // CAMERA
+            // Gentle float
+            camera.position.x += (mouse.x * 2 - camera.position.x) * 0.05;
+            camera.position.y += (mouse.y * 2 - camera.position.y) * 0.05;
+            camera.lookAt(0, 0, 0);
 
-            // Add Shake
-            if (cameraShake > 0) {
-                camera.position.x += (Math.random() - 0.5) * cameraShake;
-                camera.position.y += (Math.random() - 0.5) * cameraShake;
-            } else {
-                camera.position.x += (0 - camera.position.x) * 0.1;
-                camera.position.y += (0 - camera.position.y) * 0.1;
+            // STAGE 1: BLOCKCHAIN
+            if (currentStage === 'BLOCKCHAIN') {
+                chainGroup.visible = true;
+                universeGroup.visible = false;
+                satoshiGroup.visible = false;
+
+                camera.position.z = THREE.MathUtils.lerp(camera.position.z, 15, 0.05);
+
+                // Rotate chain slightly
+                chainGroup.rotation.y = Math.sin(time * 0.2) * 0.2;
+                chainGroup.rotation.z = Math.sin(time * 0.1) * 0.1;
+
+                // Pulse Genesis Block
+                blocks[4].rotation.x += 0.02; // Center block rotates faster
+                blocks[4].rotation.y += 0.02;
+
+                // Raycast Highlight
+                raycaster.setFromCamera(mouse, camera);
+                const intersects = raycaster.intersectObjects(chainGroup.children);
+                document.body.style.cursor = intersects.length > 0 ? 'pointer' : 'default';
+
             }
+            // STAGE 2: UNIVERSE
+            else if (currentStage === 'UNIVERSE') {
+                chainGroup.visible = false;
+                universeGroup.visible = true;
+                satoshiGroup.visible = false;
 
-            // 3. Move Blocks (Infinite Tunnel)
-            blocks.forEach(mesh => {
-                // Move towards camera
-                mesh.position.z += speed * delta * 5;
+                camera.position.z = THREE.MathUtils.lerp(camera.position.z, 20, 0.05);
 
-                // Rotations
-                mesh.rotation.x += mesh.userData.rotationSpeed.x;
-                mesh.rotation.y += mesh.userData.rotationSpeed.y;
+                // Orbit Universe
+                universeGroup.rotation.y += 0.002;
 
-                // Reset Check
-                if (mesh.position.z > 20) {
-                    mesh.position.z = -100; // Send back to far distance
-                    // Randomize position again for variety
-                    const angle = Math.random() * Math.PI * 2;
-                    const r = 5 + Math.random() * 10;
-                    mesh.position.x = Math.cos(angle) * r;
-                    mesh.position.y = Math.sin(angle) * r;
-                }
-            });
+                // Main BTC Spin
+                btcCoin.rotation.z += 0.01;
+                btcCoin.rotation.x = Math.PI / 2 + Math.sin(time) * 0.2;
 
-            // 4. Move Stars (Warp Effect)
-            const positions = starTunnel.geometry.attributes.position.array as Float32Array;
-            for (let i = 0; i < starCount; i++) {
-                positions[i * 3 + 2] += speed * delta * 15 * starSpeed[i];
-                if (positions[i * 3 + 2] > 20) {
-                    positions[i * 3 + 2] = -150;
-                }
-            }
-            starTunnel.geometry.attributes.position.needsUpdate = true;
+                // Raycast Highlight for BTC
+                raycaster.setFromCamera(mouse, camera);
+                const intersects = raycaster.intersectObject(btcCoin);
 
-            // Color Shift on Boost
-            if (isBoosting) {
-                starMat.color.lerp(new THREE.Color(0xff00ff), 0.1);
-            } else {
-                starMat.color.lerp(new THREE.Color(0xffffff), 0.1);
-            }
-
-
-            // 5. INTERACTION (Raycasting)
-            raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObjects(blocks, false); // Disable recursive to avoid hitting edges
-
-            // Reset previous hover visual
-            blocks.forEach(b => {
-                const mat = b.material as THREE.MeshPhysicalMaterial;
-                if (mat && mat.emissive && mat.emissive.getHex() !== 0x00ffff) {
-                    mat.emissive.lerp(new THREE.Color(0x00ffff), 0.1);
-                    b.scale.lerp(new THREE.Vector3(1, 1, 1), 0.1);
-                }
-            });
-
-            if (intersects.length > 0) {
-                const target = intersects[0].object as THREE.Mesh;
-                const mat = target.material as THREE.MeshPhysicalMaterial;
-
-                // Guard against non-emissive materials (wireframes, etc)
-                if (mat && mat.emissive) {
-                    // Highlight Effect
-                    mat.emissive.setHex(0xff00ff); // Purple highlight
-                    target.scale.lerp(new THREE.Vector3(1.5, 1.5, 1.5), 0.2);
-
-                    // Rotation spin
-                    target.rotation.x += 0.2;
-                    target.rotation.y += 0.2;
-
-                    // Update State ONLY if ID changed
-                    const newId = target.userData.id;
-                    if (currentHoverIdRef.current !== newId) {
-                        currentHoverIdRef.current = newId;
-                        setHoveredBlock({
-                            id: newId,
-                            txs: target.userData.txCount,
-                        });
-                        document.body.style.cursor = 'pointer';
-                    }
-                }
-            } else {
-                if (currentHoverIdRef.current !== null) {
-                    currentHoverIdRef.current = null;
-                    setHoveredBlock(null);
+                if (intersects.length > 0) {
+                    btcCoin.scale.lerp(new THREE.Vector3(1.2, 1.2, 1.2), 0.1);
+                    (btcCoin.material as THREE.MeshStandardMaterial).emissiveIntensity = 1;
+                    document.body.style.cursor = 'pointer';
+                } else {
+                    btcCoin.scale.lerp(new THREE.Vector3(1, 1, 1), 0.1);
+                    (btcCoin.material as THREE.MeshStandardMaterial).emissiveIntensity = 0.4;
                     document.body.style.cursor = 'default';
                 }
+
+                // Float coins
+                coins.forEach(c => {
+                    c.rotation.x += 0.01;
+                    c.position.add(c.userData.velocity);
+                    // Boundary check to keep them somewhat contained
+                    if (c.position.length() > 15) c.userData.velocity.negate();
+                });
+            }
+            // STAGE 3: SATOSHI
+            else if (currentStage === 'SATOSHI') {
+                chainGroup.visible = false;
+                universeGroup.visible = false;
+                satoshiGroup.visible = true;
+
+                camera.position.z = THREE.MathUtils.lerp(camera.position.z, 6, 0.05);
+
+                // Morphing face
+                faceMesh.rotation.y = Math.sin(time * 0.5) * 0.2;
+
+                // Glitch effect on particles
+                const positions = faceGeo.attributes.position.array as Float32Array;
+                for (let i = 0; i < faceParticlesCount; i++) {
+                    if (Math.random() > 0.99) {
+                        positions[i * 3] += (Math.random() - 0.5) * 0.2;
+                    } else {
+                        // Return to original? (Simplified: just chaotic vibration here)
+                    }
+                }
+                faceGeo.attributes.position.needsUpdate = true;
+                document.body.style.cursor = 'pointer'; // Reset allowed
             }
 
             renderer.render(scene, camera);
-            animationFrameId = requestAnimationFrame(animate);
         };
 
-        animate(); // Start the animation loop
+        animate();
 
-        // Cleanup
         const handleResize = () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
@@ -273,18 +362,17 @@ export default function SatoshiMysteryShowcase() {
         window.addEventListener('resize', handleResize);
 
         return () => {
-            cancelAnimationFrame(animationFrameId); // Cancel the animation frame
             window.removeEventListener('mousemove', onMouseMove);
-            window.removeEventListener('mousedown', onMouseDown);
-            window.removeEventListener('mouseup', onMouseUp);
+            window.removeEventListener('click', onClick);
             window.removeEventListener('resize', handleResize);
             if (mountRef.current && renderer.domElement) {
                 mountRef.current.removeChild(renderer.domElement);
             }
             renderer.dispose();
-            document.body.style.cursor = 'default';
         };
     }, []);
+
+    const content = STORY_STAGES[stage];
 
     return (
         <section id="showcase" style={{
@@ -292,72 +380,94 @@ export default function SatoshiMysteryShowcase() {
             position: 'relative',
             overflow: 'hidden',
             background: 'black',
-            cursor: 'crosshair'
+            color: 'white'
         }}>
             <div ref={mountRef} style={{ width: '100%', height: '100%', position: 'absolute' }} />
 
-            {/* Block Data Tooltip (Floating UI) */}
-            <AnimatePresence>
-                {hoveredBlock && (
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.8 }}
-                        style={{
-                            position: 'fixed',
-                            left: '50%',
-                            top: '50%',
-                            transform: 'translate(-50%, -50%)', // Center primarily, but specific adjustments below
-                            pointerEvents: 'none',
-                            zIndex: 100,
-                            background: 'rgba(0, 0, 0, 0.8)',
-                            border: '1px solid #00ffff',
-                            padding: '10px 20px',
-                            borderRadius: '5px',
-                            boxShadow: '0 0 20px rgba(0, 255, 255, 0.4)',
-                            fontFamily: 'monospace'
-                        }}
-                    >
-                        <h4 style={{ color: '#fff', margin: 0, fontSize: '0.9rem' }}>BLOCK: {hoveredBlock.id}</h4>
-                        <div style={{ width: '100%', height: '1px', background: '#00ffff', margin: '5px 0' }} />
-                        <p style={{ color: '#00ffff', margin: 0, fontSize: '0.8rem' }}>TXs: {hoveredBlock.txs}</p>
-                        <p style={{ color: '#ff00ff', margin: 0, fontSize: '0.8rem' }}>STATUS: MINED</p>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            {/* Hint UI */}
+            {/* UI LAYER */}
             <div style={{
                 position: 'absolute',
-                bottom: '30px',
+                top: 0,
+                left: 0,
                 width: '100%',
+                height: '100%',
+                pointerEvents: 'none',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
                 textAlign: 'center',
-                color: 'rgba(255, 255, 255, 0.5)',
-                fontFamily: 'monospace',
-                fontSize: '0.8rem',
-                pointerEvents: 'none'
+                zIndex: 10
             }}>
-                [HOVER BLOCKS TO SCAN] • [HOLD CLICK TO WARP SPEED]
+                <AnimatePresence mode='wait'>
+                    <motion.div
+                        key={stage}
+                        initial={{ opacity: 0, y: 20, filter: 'blur(10px)' }}
+                        animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                        exit={{ opacity: 0, y: -20, filter: 'blur(10px)' }}
+                        transition={{ duration: 0.8 }}
+                    >
+                        <h5 style={{
+                            color: '#22d3ee',
+                            letterSpacing: '0.2em',
+                            marginBottom: '1rem',
+                            fontWeight: '600'
+                        }}>
+                            /// {stage} LAYER ///
+                        </h5>
+                        <h1 style={{
+                            fontSize: 'clamp(3rem, 6vw, 5rem)',
+                            fontWeight: '900',
+                            lineHeight: 1,
+                            marginBottom: '1rem',
+                            textShadow: '0 0 30px rgba(255,255,255,0.2)'
+                        }}>
+                            {content.title}
+                        </h1>
+                        <p style={{
+                            fontSize: '1.2rem',
+                            color: '#94a3b8',
+                            maxWidth: '600px',
+                            margin: '0 auto 2rem'
+                        }}>
+                            {content.subtitle}
+                        </p>
+
+                        <div style={{
+                            display: 'inline-block',
+                            border: '1px solid rgba(255,255,255,0.2)',
+                            padding: '10px 20px',
+                            background: 'rgba(0,0,0,0.5)',
+                            backdropFilter: 'blur(10px)',
+                            borderRadius: '30px',
+                            fontSize: '0.9rem',
+                            color: '#fff',
+                            letterSpacing: '0.1em'
+                        }}>
+                            [ {content.instruction} ]
+                        </div>
+                    </motion.div>
+                </AnimatePresence>
             </div>
 
-            {/* Overlay Title */}
+            {/* Nav Dots */}
             <div style={{
                 position: 'absolute',
-                top: '15%',
+                bottom: '40px',
                 left: '50%',
                 transform: 'translateX(-50%)',
-                textAlign: 'center',
-                pointerEvents: 'none',
-                mixBlendMode: 'difference'
+                display: 'flex',
+                gap: '10px'
             }}>
-                <h2 style={{
-                    fontSize: '4rem',
-                    fontWeight: '900',
-                    color: 'white',
-                    letterSpacing: '10px',
-                    margin: 0,
-                    textShadow: '0 0 10px white'
-                }}>CYBER<span style={{ color: '#00ffff' }}>CHAIN</span></h2>
+                {Object.keys(STORY_STAGES).map((s) => (
+                    <div key={s} style={{
+                        width: '8px',
+                        height: '8px',
+                        borderRadius: '50%',
+                        background: stage === s ? '#22d3ee' : '#333',
+                        transition: 'background 0.3s'
+                    }} />
+                ))}
             </div>
         </section>
     );
