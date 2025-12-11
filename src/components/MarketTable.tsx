@@ -5,7 +5,7 @@
 import { useState, useEffect } from 'react';
 import styles from './MarketTable.module.css';
 import { RefreshCcw, Search, ChevronLeft, ChevronRight, Star } from 'lucide-react';
-import Sidebar from './Sidebar';
+
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 
@@ -28,7 +28,7 @@ export default function MarketTable() {
     const [searchTerm, setSearchTerm] = useState('');
     const [page, setPage] = useState(1);
     const [category, setCategory] = useState('market_cap_desc');
-    const [sidebarOpen, setSidebarOpen] = useState(true);
+
 
     // Auth for watchlist
     const { user, toggleWatchlist } = useAuth();
@@ -86,10 +86,8 @@ export default function MarketTable() {
     };
 
     return (
-        <div style={{ display: 'flex' }}>
-            <Sidebar isOpen={sidebarOpen} toggle={() => setSidebarOpen(!sidebarOpen)} />
-
-            <main style={{ flex: 1, marginLeft: sidebarOpen ? '240px' : '0', transition: 'margin 0.3s' }}>
+        <div style={{ width: '100%', maxWidth: '1440px', margin: '0 auto' }}>
+            <main style={{ width: '100%', padding: '0 1rem' }}>
                 <section className={styles.marketSection}>
                     <div className={styles.controls}>
                         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
