@@ -30,6 +30,11 @@ export default function Navbar() {
         router.push('/');
     };
 
+    // Hide navbar if user is not logged in
+    if (!user) {
+        return null;
+    }
+
     return (
         <motion.nav
             initial={{ y: 0 }}

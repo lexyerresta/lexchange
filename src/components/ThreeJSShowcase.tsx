@@ -243,20 +243,25 @@ export default function ThreeJSShowcase() {
                 left: '50%',
                 transform: 'translateX(-50%)',
                 zIndex: 10,
-                textAlign: 'center'
+                textAlign: 'center',
+                maxWidth: '90%'
             }}>
                 <h3 style={{
-                    fontSize: '2rem',
-                    fontWeight: '800',
-                    background: 'linear-gradient(135deg, #f7931a, #fbbf24)',
+                    fontSize: '2.5rem',
+                    fontWeight: '900',
+                    background: 'linear-gradient(135deg, #f7931a, #fbbf24, #f7931a)',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
-                    marginBottom: '0.5rem'
+                    marginBottom: '0.5rem',
+                    letterSpacing: '0.05em'
                 }}>
-                    Real-Time Crypto Universe
+                    Crypto Mandala
                 </h3>
-                <p style={{ color: '#94a3b8', fontSize: '1rem' }}>
-                    Interactive 3D visualization of top cryptocurrencies
+                <p style={{ color: '#94a3b8', fontSize: '1.1rem', marginBottom: '0.25rem' }}>
+                    Sacred Geometry of Digital Currency
+                </p>
+                <p style={{ color: '#64748b', fontSize: '0.9rem', fontStyle: 'italic' }}>
+                    Powered by Three.js • Real-time 3D Rendering
                 </p>
             </div>
 

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { TrendingUp, Zap, Shield, ArrowRight, Sparkles } from 'lucide-react';
+import GlitchText from './GlitchText';
 
 export default function Hero() {
     const { user } = useAuth();
@@ -26,8 +27,8 @@ export default function Hero() {
     }, []);
 
     const parallaxOffset = scrollY * 0.5;
-    const mouseParallaxX = (mousePos.x - window.innerWidth / 2) * 0.02;
-    const mouseParallaxY = (mousePos.y - window.innerHeight / 2) * 0.02;
+    const mouseParallaxX = typeof window !== 'undefined' ? (mousePos.x - window.innerWidth / 2) * 0.02 : 0;
+    const mouseParallaxY = typeof window !== 'undefined' ? (mousePos.y - window.innerHeight / 2) * 0.02 : 0;
 
     return (
         <section style={{

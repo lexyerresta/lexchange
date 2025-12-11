@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Wallet, ArrowRight, Mail, User } from 'lucide-react';
 import Link from 'next/link';
+import CyberGridBackground from '@/components/CyberGridBackground';
+import GlitchText from '@/components/GlitchText';
 
 export default function LoginPage() {
     const { user, login, register, isLoading } = useAuth();
@@ -42,8 +44,11 @@ export default function LoginPage() {
             alignItems: 'center',
             justifyContent: 'center',
             color: 'white',
-            padding: '2rem'
+            padding: '2rem',
+            position: 'relative'
         }}>
+            <CyberGridBackground />
+
             <div className="glass-card" style={{
                 padding: '3rem',
                 maxWidth: '480px',
@@ -52,18 +57,18 @@ export default function LoginPage() {
                 borderRadius: '1.5rem',
                 border: '1px solid rgba(255,255,255,0.1)',
                 background: 'rgba(20, 20, 30, 0.6)',
-                backdropFilter: 'blur(20px)'
+                backdropFilter: 'blur(20px)',
+                position: 'relative',
+                zIndex: 1
             }}>
-                <div style={{
-                    fontSize: '3rem',
-                    fontWeight: '800',
-                    marginBottom: '0.5rem',
-                    background: 'linear-gradient(to right, #a78bfa, #4ade80)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent'
-                }}>
-                    LEXCHANGE
-                </div>
+                <GlitchText
+                    text="LEXCHANGE"
+                    style={{
+                        fontSize: '3rem',
+                        fontWeight: '800',
+                        marginBottom: '0.5rem'
+                    }}
+                />
                 <p style={{ color: '#94a3b8', marginBottom: '2.5rem', fontSize: '1.1rem' }}>
                     The Next Gen Crypto Interface
                 </p>
@@ -181,7 +186,7 @@ export default function LoginPage() {
                 </div>
 
                 <div style={{ marginTop: '2rem', fontSize: '0.9rem', color: '#64748b' }}>
-                    By connecting, you agree to our <Link href="#" style={{ color: '#a78bfa' }}>Terms of Service</Link>
+                    By connecting, you agree to our <Link href="https://github.com/lexyerresta/lexchange#readme" target="_blank" rel="noopener noreferrer" style={{ color: '#a78bfa' }}>Terms of Service</Link>
                 </div>
             </div>
 

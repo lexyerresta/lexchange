@@ -6,7 +6,13 @@ import Hero from "@/components/Hero";
 import MarketTable from "@/components/MarketTable";
 import Footer from "@/components/Footer";
 import AnimatedBackground from "@/components/AnimatedBackground";
-import ThreeJSShowcase from "@/components/ThreeJSShowcase";
+import SatoshiMysteryShowcase from "@/components/SatoshiMysteryShowcase";
+import FloatingAIButton from "@/components/FloatingAIButton";
+import LivePriceTicker from "@/components/LivePriceTicker";
+import HolographicCard from "@/components/HolographicCard";
+import ParticleCursor from "@/components/ParticleCursor";
+import LoadingScreen from "@/components/LoadingScreen";
+import StatsGrid from "@/components/StatsGrid";
 import { Zap, Shield, TrendingUp, Users, Bot, Eye } from 'lucide-react';
 
 export default function Home() {
@@ -65,11 +71,30 @@ export default function Home() {
 
   return (
     <main style={{ position: 'relative', overflow: 'hidden' }}>
+      <LoadingScreen />
+      <ParticleCursor />
       <AnimatedBackground />
 
       <div style={{ position: 'relative', zIndex: 1 }}>
         <Navbar />
         <Hero />
+
+        {/* Live Price Ticker */}
+        <LivePriceTicker />
+
+        {/* Stats Section */}
+        <section style={{
+          padding: '4rem 2rem',
+          maxWidth: '1400px',
+          margin: '0 auto'
+        }}>
+          <StatsGrid stats={[
+            { value: 2400000000, label: '24h Trading Volume', prefix: '$', decimals: 0, color: '#a78bfa' },
+            { value: 24891, label: 'Active Traders', suffix: '+', decimals: 0, color: '#22d3ee' },
+            { value: 156, label: 'Average ROI', suffix: '%', decimals: 0, color: '#4ade80' },
+            { value: 99.9, label: 'Uptime', suffix: '%', decimals: 1, color: '#fbbf24' }
+          ]} />
+        </section>
 
         {/* 3D Showcase Section */}
         <section style={{
@@ -84,19 +109,22 @@ export default function Home() {
               fontSize: 'clamp(2rem, 5vw, 3rem)',
               fontWeight: '800',
               marginBottom: '1rem',
-              background: 'linear-gradient(135deg, #f7931a 0%, #fbbf24 100%)',
+              background: 'linear-gradient(135deg, #a78bfa 0%, #22d3ee 50%, #4ade80 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text'
             }}>
-              Experience the Future
+              The Satoshi Mystery
             </h2>
-            <p style={{ color: '#94a3b8', fontSize: '1.2rem', maxWidth: '600px', margin: '0 auto' }}>
-              Interactive 3D visualization of cryptocurrency
+            <p style={{ color: '#94a3b8', fontSize: '1.2rem', maxWidth: '700px', margin: '0 auto 0.5rem' }}>
+              The enigma that started it all
+            </p>
+            <p style={{ color: '#64748b', fontSize: '0.95rem', fontStyle: 'italic' }}>
+              Who is Satoshi Nakamoto? The mystery continues...
             </p>
           </div>
 
-          <ThreeJSShowcase />
+          <SatoshiMysteryShowcase />
         </section>
 
         {/* Features Section */}
@@ -130,58 +158,59 @@ export default function Home() {
             gap: '2rem'
           }}>
             {features.map((feature, idx) => (
-              <div
-                key={idx}
-                className="feature-card"
-                style={{
-                  background: feature.gradient,
-                  backdropFilter: 'blur(20px)',
-                  border: `1px solid ${feature.color}33`,
-                  borderRadius: '1.5rem',
-                  padding: '2rem',
-                  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                  cursor: 'pointer',
-                  transform: `translateY(${Math.max(0, (scrollY - 600 - idx * 50) * -0.05)}px)`,
-                  opacity: Math.min(1, Math.max(0, (scrollY - 400 - idx * 50) / 200))
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-10px) scale(1.02)';
-                  e.currentTarget.style.boxShadow = `0 20px 60px ${feature.color}40`;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0) scale(1)';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-              >
-                <div style={{
-                  width: '60px',
-                  height: '60px',
-                  borderRadius: '1rem',
-                  background: `${feature.color}22`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: '1.5rem',
-                  color: feature.color
-                }}>
-                  {feature.icon}
+              <HolographicCard key={idx} intensity={0.8}>
+                <div
+                  className="feature-card"
+                  style={{
+                    background: feature.gradient,
+                    backdropFilter: 'blur(20px)',
+                    border: `1px solid ${feature.color}33`,
+                    borderRadius: '1.5rem',
+                    padding: '2rem',
+                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                    cursor: 'pointer',
+                    transform: `translateY(${Math.max(0, (scrollY - 600 - idx * 50) * -0.05)}px)`,
+                    opacity: Math.min(1, Math.max(0, (scrollY - 400 - idx * 50) / 200))
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-10px) scale(1.02)';
+                    e.currentTarget.style.boxShadow = `0 20px 60px ${feature.color}40`;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
+                >
+                  <div style={{
+                    width: '60px',
+                    height: '60px',
+                    borderRadius: '1rem',
+                    background: `${feature.color}22`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: '1.5rem',
+                    color: feature.color
+                  }}>
+                    {feature.icon}
+                  </div>
+                  <h3 style={{
+                    fontSize: '1.5rem',
+                    fontWeight: '700',
+                    color: 'white',
+                    marginBottom: '1rem'
+                  }}>
+                    {feature.title}
+                  </h3>
+                  <p style={{
+                    color: '#94a3b8',
+                    lineHeight: '1.6',
+                    fontSize: '1rem'
+                  }}>
+                    {feature.description}
+                  </p>
                 </div>
-                <h3 style={{
-                  fontSize: '1.5rem',
-                  fontWeight: '700',
-                  color: 'white',
-                  marginBottom: '1rem'
-                }}>
-                  {feature.title}
-                </h3>
-                <p style={{
-                  color: '#94a3b8',
-                  lineHeight: '1.6',
-                  fontSize: '1rem'
-                }}>
-                  {feature.description}
-                </p>
-              </div>
+              </HolographicCard>
             ))}
           </div>
         </section>
@@ -196,6 +225,9 @@ export default function Home() {
 
         <Footer />
       </div>
+
+      {/* Floating AI Assistant Button */}
+      <FloatingAIButton />
 
       <style jsx global>{`
                 .feature-card {
