@@ -214,12 +214,12 @@ export default function SatoshiMysteryShowcase() {
 
             // 5. INTERACTION (Raycasting)
             raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObjects(blocks);
+            const intersects = raycaster.intersectObjects(blocks, false); // Disable recursive to avoid hitting edges
 
             // Reset previous hover visual
             blocks.forEach(b => {
                 const mat = b.material as THREE.MeshPhysicalMaterial;
-                if (mat.emissive.getHex() !== 0x00ffff) {
+                if (mat && mat.emissive && mat.emissive.getHex() !== 0x00ffff) {
                     mat.emissive.lerp(new THREE.Color(0x00ffff), 0.1);
                     b.scale.lerp(new THREE.Vector3(1, 1, 1), 0.1);
                 }
@@ -229,23 +229,26 @@ export default function SatoshiMysteryShowcase() {
                 const target = intersects[0].object as THREE.Mesh;
                 const mat = target.material as THREE.MeshPhysicalMaterial;
 
-                // Highlight Effect
-                mat.emissive.setHex(0xff00ff); // Purple highlight
-                target.scale.lerp(new THREE.Vector3(1.5, 1.5, 1.5), 0.2);
+                // Guard against non-emissive materials (wireframes, etc)
+                if (mat && mat.emissive) {
+                    // Highlight Effect
+                    mat.emissive.setHex(0xff00ff); // Purple highlight
+                    target.scale.lerp(new THREE.Vector3(1.5, 1.5, 1.5), 0.2);
 
-                // Rotation spin
-                target.rotation.x += 0.2;
-                target.rotation.y += 0.2;
+                    // Rotation spin
+                    target.rotation.x += 0.2;
+                    target.rotation.y += 0.2;
 
-                // Update State ONLY if ID changed
-                const newId = target.userData.id;
-                if (currentHoverIdRef.current !== newId) {
-                    currentHoverIdRef.current = newId;
-                    setHoveredBlock({
-                        id: newId,
-                        txs: target.userData.txCount,
-                    });
-                    document.body.style.cursor = 'pointer';
+                    // Update State ONLY if ID changed
+                    const newId = target.userData.id;
+                    if (currentHoverIdRef.current !== newId) {
+                        currentHoverIdRef.current = newId;
+                        setHoveredBlock({
+                            id: newId,
+                            txs: target.userData.txCount,
+                        });
+                        document.body.style.cursor = 'pointer';
+                    }
                 }
             } else {
                 if (currentHoverIdRef.current !== null) {
